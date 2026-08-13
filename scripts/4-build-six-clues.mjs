@@ -1,7 +1,7 @@
 /**
  * Rebuilds the Spurs Vault dataset: `src/lib/six-clues/players.ts` and `public/six-clues/`.
  *
- *   node scripts/build-players.mjs
+ *   node scripts/4-build-six-clues.mjs
  *
  * Sources
  *   basketball-reference SAS franchise register  → who played for the Spurs, and
@@ -10,7 +10,8 @@
  *   nba.com player pages (__NEXT_DATA__)         → position, height, jersey, school, draft
  *   basketball-reference player pages            → All-Star / All-NBA / MVP / Hall of Fame
  *   basketball-reference title-season rosters     → championships won in San Antonio
- *   cdn.nba.com headshots, bbref as fallback     → the photo the game reveals
+ *   NBA team+season archive, then bbref          → the photo the game reveals,
+ *                                                  the player in a Spurs jersey where one exists
  *
  * A player with no real headshot is dropped, since the reveal is the whole game.
  *
@@ -21,8 +22,11 @@ import fs from 'node:fs'
 import path from 'node:path'
 import crypto from 'node:crypto'
 import { fileURLToPath } from 'node:url'
+import { execFile as execFileCb } from 'node:child_process'
+import { promisify } from 'node:util'
 import sharp from 'sharp'
 
+const execFile = promisify(execFileCb)
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const CACHE = process.env.SPURS_CACHE ?? path.join(ROOT, 'scripts/.cache')
 const UA =
@@ -70,6 +74,15 @@ const NOT_ON_THE_TITLE_TEAM = [
   { player: 'Malik Rose', season: 2005 },
 ]
 
+/**
+ * Players whose nba.com headshot beats their basketball-reference portrait on
+ * era grounds, checked by eye. The automatic rule below prefers nba.com only
+ * when nba.com itself files the player under San Antonio, which misses cases
+ * like Kerr — filed under Chicago, but the photo on hand is him in a Spurs
+ * jersey. Wilkins is here because bbref only has an action shot of him.
+ */
+const PREFER_NBA_HEADSHOT = new Set(['Steve Kerr', 'Dominique Wilkins'])
+
 // ---------------------------------------------------------------------- http
 
 const sleep = ms => new Promise(r => setTimeout(r, ms))
@@ -105,6 +118,29 @@ async function fetchCached(url, key, { binary = false, throttleMs = 0 } = {}) {
 }
 
 const bbref = (url, key) => fetchCached(url, key, { throttleMs: 3500 })
+
+/**
+ * Same disk cache, but the request goes out through curl. Some NBA hosts reject
+ * Node's fetch outright on TLS/HTTP fingerprinting while answering curl fine.
+ */
+async function curlCached(url, key, throttleMs = 2500) {
+  const file = path.join(CACHE, key)
+  if (fs.existsSync(file)) {
+    const buf = fs.readFileSync(file)
+    return buf.length === 0 ? null : buf
+  }
+  const tmp = `${file}.part`
+  fs.mkdirSync(path.dirname(file), { recursive: true })
+  const { stdout } = await execFile('curl', [
+    '-s', '-m', '25', '-A', UA, '-w', '%{http_code}', '-o', tmp, url,
+  ])
+  const ok = stdout.trim() === '200' && fs.existsSync(tmp)
+  const body = ok ? fs.readFileSync(tmp) : Buffer.alloc(0)
+  fs.rmSync(tmp, { force: true })
+  fs.writeFileSync(file, body)
+  await sleep(throttleMs)
+  return body.length ? body : null
+}
 
 async function mapLimit(items, limit, fn) {
   const out = new Array(items.length)
@@ -248,6 +284,41 @@ const bbrefHeadshot = slug =>
 const sha1 = buf => crypto.createHash('sha1').update(buf).digest('hex')
 
 /**
+ * A headshot of the player actually wearing a Spurs jersey, from a season he
+ * played here. This legacy archive is keyed by team and season, and it verifies
+ * the pairing — asking for a non-Spur under the Spurs team id 403s — so a hit is
+ * guaranteed to be the right player in the right uniform.
+ *
+ * Coverage starts around 2015-16. Anyone whose Spurs run ended earlier falls
+ * back to a period portrait below.
+ *
+ * Two caveats, both handled: the host rejects Node's fetch on client
+ * fingerprinting (hence curl), and it rate-limits hard enough to blackhole an
+ * IP for several minutes, so requests are serialised with a wide throttle.
+ */
+const SPURS_TEAM_ID = 1610612759
+const ARCHIVE_FROM_SEASON = 2013
+
+function eraSeasons(p) {
+  const years = []
+  for (let y = p.from - 1; y <= p.to - 1; y++) if (y >= ARCHIVE_FROM_SEASON) years.push(y)
+  if (!years.length) return []
+  // Aim for the middle of his Spurs run, then walk outward: a photo from his
+  // peak here reads better than one from a farewell season.
+  const mid = (years[0] + years[years.length - 1]) / 2
+  return years.sort((a, b) => Math.abs(a - mid) - Math.abs(b - mid) || b - a)
+}
+
+async function spursEraHeadshot(p) {
+  for (const season of eraSeasons(p)) {
+    const url = `https://ak-static.cms.nba.com/wp-content/uploads/headshots/nba/${SPURS_TEAM_ID}/${season}/1040x760/${p.id}.png`
+    const buf = await curlCached(url, `shot-era-${p.id}-${season}.png`)
+    if (buf && buf.length > 10_000) return { buf, season }
+  }
+  return null
+}
+
+/**
  * Normalises wildly different sources — 1040x760 transparent PNGs, 120x180 JPEGs,
  * the odd action shot — into one 512x512 white frame, so the reveal looks the same
  * for a 1970s Spur as for a rookie.
@@ -307,23 +378,44 @@ async function main() {
   const dropped = []
 
   for (const [i, p] of picks.entries()) {
-    let photo = nbaShots[i]
-    let source = 'nba'
-    if (photo && placeholders.has(sha1(photo))) photo = null
-    if (!photo) {
-      photo = await bbrefHeadshot(p.bbref)
-      source = 'bbref'
-    }
-    if (!photo) {
-      dropped.push(`${p.name} — no headshot`)
-      continue
-    }
-
     const info = await nbaBio(p.id, p.slug)
     if (!info) {
       dropped.push(`${p.name} — no nba.com bio`)
       continue
     }
+
+    // Pick the most era-appropriate photo available. nba.com's `latest` headshot
+    // is whatever team the player finished with, which for someone like Kawhi
+    // Leonard means a Clippers jersey in a Spurs game — so it goes last.
+    let latest = nbaShots[i]
+    if (latest && placeholders.has(sha1(latest))) latest = null
+
+    let photo = null
+    let source = null
+
+    const era = await spursEraHeadshot(p)
+    if (era) {
+      photo = era.buf
+      source = `era ${era.season}-${String((era.season + 1) % 100).padStart(2, '0')}`
+    } else if (latest && (info.TEAM_ABBREVIATION === 'SAS' || PREFER_NBA_HEADSHOT.has(p.name))) {
+      // nba.com files him under San Antonio, so the photo it has is a Spurs one.
+      photo = latest
+      source = 'nba (Spurs kit)'
+    } else {
+      // A period portrait: low resolution, but frozen in the right decade.
+      photo = await bbrefHeadshot(p.bbref)
+      source = 'bbref'
+      if (!photo && latest) {
+        photo = latest
+        source = 'nba (other team)'
+      }
+    }
+
+    if (!photo) {
+      dropped.push(`${p.name} — no headshot`)
+      continue
+    }
+
     const awards = await bbrefAwards(p.bbref)
     if (!awards) {
       dropped.push(`${p.name} — no bbref page`)
@@ -379,9 +471,11 @@ async function main() {
   if (missingHeight.length) throw new Error(`no height for ${missingHeight.map(p => p.name)}`)
 
   players.sort((a, b) => a.name.localeCompare(b.name))
-  const sources = Object.fromEntries(
-    ['nba', 'bbref'].map(s => [s, players.filter(p => p.source === s).length])
-  )
+  const sources = players.reduce((acc, p) => {
+    const kind = p.source.startsWith('era') ? 'Spurs-era archive' : p.source
+    acc[kind] = (acc[kind] ?? 0) + 1
+    return acc
+  }, {})
   for (const p of players) delete p.source
 
   const generated = `// AUTO-GENERATED by scripts/build-players.mjs — do not edit by hand.
@@ -441,7 +535,14 @@ export const PLAYERS: Player[] = ${JSON.stringify(players, null, 2)}
   console.log(
     `\n${players.length} players — tier 1: ${players.filter(p => p.tier === 1).length}, tier 2: ${players.filter(p => p.tier === 2).length}`
   )
-  console.log(`headshots — nba.com: ${sources.nba}, basketball-reference: ${sources.bbref}`)
+  console.log('headshots by source:')
+  for (const [kind, n] of Object.entries(sources).sort((a, b) => b[1] - a[1])) {
+    console.log(`  ${String(n).padStart(3)}  ${kind}`)
+  }
+  const wrongKit = players.filter(p => p.source === 'nba (other team)')
+  if (wrongKit.length) {
+    console.log(`not in a Spurs jersey (no archive or period photo): ${wrongKit.map(p => p.name).join(', ')}`)
+  }
   if (dropped.length) console.log(`dropped:\n  ${dropped.join('\n  ')}`)
 }
 
