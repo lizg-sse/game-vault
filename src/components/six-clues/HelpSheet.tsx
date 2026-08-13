@@ -6,12 +6,12 @@ import { Sheet } from './Sheet'
 function Step({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
   return (
     <li className="flex gap-3">
-      <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-line-2 font-mono text-[10px] text-silver">
+      <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-[2px] bg-edge font-display text-[10px] text-silver">
         {n}
       </span>
       <div>
-        <p className="text-[14px] font-semibold text-chalk">{title}</p>
-        <p className="mt-0.5 text-[13px] leading-relaxed text-silver-dim">{children}</p>
+        <p className="text-[14px] font-semibold text-paper">{title}</p>
+        <p className="mt-0.5 text-[13px] leading-relaxed text-faint">{children}</p>
       </div>
     </li>
   )
@@ -38,7 +38,7 @@ export function HelpSheet({ open, onClose }: { open: boolean; onClose: () => voi
             {SCORE_BY_CLUES.map((pts, i) => (
               <span
                 key={i}
-                className="rounded-md bg-panel-2 px-1.5 py-0.5 font-mono text-[11px] text-silver tabular-nums"
+                className="rounded-[2px] bg-raised px-1.5 py-0.5 font-display text-[11px] text-silver tabular-nums"
               >
                 {i + 1} → {pts}
               </span>
@@ -47,15 +47,15 @@ export function HelpSheet({ open, onClose }: { open: boolean; onClose: () => voi
         </Step>
       </ol>
 
-      <div className="mt-5 rounded-2xl border border-line bg-panel p-3.5">
-        <p className="font-mono text-[10px] tracking-[0.14em] text-silver-dim uppercase">
+      <div className="mt-5 rounded-[3px] border border-[var(--line)] bg-surface p-3.5">
+        <p className="font-display text-[10px] tracking-[0.14em] text-faint uppercase">
           Easy vs Hard
         </p>
-        <p className="mt-1.5 text-[13px] leading-relaxed text-silver-dim">
-          <span className="font-semibold text-chalk">Easy</span> sticks to Spurs most fans could
+        <p className="mt-1.5 text-[13px] leading-relaxed text-faint">
+          <span className="font-semibold text-paper">Easy</span> sticks to Spurs most fans could
           name, and the <span className="text-fiesta-orange">Hint</span> button lists everyone the
           clues haven&rsquo;t ruled out yet.{' '}
-          <span className="font-semibold text-chalk">Hard</span> reaches deep into the franchise
+          <span className="font-semibold text-paper">Hard</span> reaches deep into the franchise
           register with no hints — and has its own player each day.
         </p>
       </div>

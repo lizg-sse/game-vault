@@ -17,7 +17,7 @@ function Pips({ turns, status }: { turns: Turn[]; status: 'playing' | 'won' | 'l
               isWin
                 ? 'bg-fiesta-teal'
                 : !turn
-                  ? 'bg-line'
+                  ? 'bg-edge'
                   : turn.kind === 'skip'
                     ? 'bg-fiesta-orange/70'
                     : 'bg-fiesta-pink/70'
@@ -97,7 +97,7 @@ export function GuessBar({
           id={listId}
           role="listbox"
           aria-label="Matching players"
-          className="animate-fade-in absolute bottom-full left-0 mb-2 max-h-[42dvh] w-full overflow-y-auto rounded-2xl border border-line-2 bg-panel shadow-[0_-14px_40px_-12px_rgb(0_0_0_/_0.85)]"
+          className="animate-fade-in absolute bottom-full left-0 mb-2 max-h-[42dvh] w-full overflow-y-auto rounded-[3px] border border-[var(--line-strong)] bg-surface shadow-[0_-14px_40px_-12px_rgb(0_0_0_/_0.85)]"
         >
           {matches.map((player, i) => (
             <li key={player.id} role="option" aria-selected={i === active}>
@@ -109,7 +109,7 @@ export function GuessBar({
                 }}
                 onMouseEnter={() => setActive(i)}
                 className={`flex w-full items-center px-4 py-3 text-left text-[15px] transition-colors ${
-                  i === active ? 'bg-panel-2 text-chalk' : 'text-silver'
+                  i === active ? 'bg-raised text-paper' : 'text-silver'
                 }`}
               >
                 {player.name}
@@ -141,12 +141,12 @@ export function GuessBar({
             aria-controls={open ? listId : undefined}
             aria-autocomplete="list"
             aria-label="Guess a San Antonio Spurs player"
-            className="min-w-0 flex-1 rounded-2xl border border-line-2 bg-panel px-4 py-3 text-[16px] text-chalk placeholder:text-silver-dim/70 focus:border-silver/60 focus:outline-none"
+            className="min-w-0 flex-1 rounded-[3px] border border-[var(--line-strong)] bg-surface px-4 py-3 text-[16px] text-paper placeholder:text-faint/70 focus:border-silver/60 focus:outline-none"
           />
           <button
             onClick={() => submit(matches[active] ?? searchPlayers(pool, query, 1)[0])}
             disabled={!query.trim()}
-            className="rounded-2xl bg-silver px-4 text-[14px] font-semibold text-ink transition-opacity disabled:opacity-30"
+            className="rounded-[3px] bg-silver px-4 text-[14px] font-semibold text-ink transition-opacity disabled:opacity-30"
           >
             Guess
           </button>
@@ -156,18 +156,18 @@ export function GuessBar({
           {canHint && (
             <button
               onClick={onHint}
-              className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-line-2 bg-panel-2 py-2.5 text-[13px] font-medium text-silver transition-colors active:bg-line"
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-[3px] border border-[var(--line-strong)] bg-raised py-2.5 text-[13px] font-medium text-silver transition-colors active:bg-edge"
             >
               <svg viewBox="0 0 16 16" className="h-3.5 w-3.5 text-fiesta-orange" fill="currentColor">
                 <path d="M8 1a4.6 4.6 0 0 0-2.7 8.33c.3.22.48.55.5.91l.03.51h4.34l.03-.51c.02-.36.2-.69.5-.91A4.6 4.6 0 0 0 8 1ZM6 12.4h4v.6a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-.6Z" />
               </svg>
               Hint
-              <span className="font-mono text-[11px] text-silver-dim">{hintCount}</span>
+              <span className="font-display text-[11px] text-faint">{hintCount}</span>
             </button>
           )}
           <button
             onClick={onSkip}
-            className="flex-1 rounded-xl border border-line-2 bg-panel-2 py-2.5 text-[13px] font-medium text-silver transition-colors active:bg-line"
+            className="flex-1 rounded-[3px] border border-[var(--line-strong)] bg-raised py-2.5 text-[13px] font-medium text-silver transition-colors active:bg-edge"
           >
             Skip for a clue
           </button>

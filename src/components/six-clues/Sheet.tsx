@@ -77,17 +77,17 @@ export function Sheet({
         aria-modal="true"
         aria-label={title}
         tabIndex={-1}
-        className="animate-sheet-in relative max-h-[86dvh] overflow-y-auto rounded-t-3xl border-t border-line-2 bg-panel pb-[max(1rem,env(safe-area-inset-bottom))] outline-none"
+        className="animate-sheet-in relative max-h-[86dvh] overflow-y-auto rounded-t-3xl border-t border-[var(--line-strong)] bg-surface pb-[max(1rem,env(safe-area-inset-bottom))] outline-none"
       >
-        <div className="sticky top-0 z-10 flex items-center gap-3 border-b border-line bg-panel/95 px-5 pt-3 pb-3 backdrop-blur">
+        <div className="sticky top-0 z-10 flex items-center gap-3 border-b border-[var(--line)] bg-surface/95 px-5 pt-3 pb-3 backdrop-blur">
           <div
             aria-hidden
-            className="absolute top-1.5 left-1/2 h-1 w-9 -translate-x-1/2 rounded-full bg-line-2"
+            className="absolute top-1.5 left-1/2 h-1 w-9 -translate-x-1/2 rounded-full bg-edge"
           />
           <h2 className="mt-1 flex-1 text-[15px] font-semibold tracking-tight">{title}</h2>
           <button
             onClick={onClose}
-            className="mt-1 -mr-1 grid h-8 w-8 place-items-center rounded-full text-silver-dim transition-colors hover:bg-panel-2 hover:text-chalk"
+            className="mt-1 -mr-1 grid h-8 w-8 place-items-center rounded-[2px] text-faint transition-colors hover:bg-raised hover:text-paper"
             aria-label="Close"
           >
             <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8">

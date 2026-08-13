@@ -22,8 +22,8 @@ export function HintSheet({
 }) {
   return (
     <Sheet open={open} onClose={onClose} title="Still in play">
-      <p className="mb-3.5 text-[13px] leading-relaxed text-silver-dim">
-        <span className="font-semibold text-chalk">{candidates.length}</span>{' '}
+      <p className="mb-3.5 text-[13px] leading-relaxed text-faint">
+        <span className="font-semibold text-paper">{candidates.length}</span>{' '}
         {candidates.length === 1 ? 'player fits' : 'players fit'}{' '}
         {revealed === 1 ? 'the first clue' : `all ${revealed} clues so far`}. Tap one to guess it.
       </p>
@@ -36,7 +36,7 @@ export function HintSheet({
               onPick(player)
               onClose()
             }}
-            className="rounded-full border border-line-2 bg-panel-2 px-3 py-1.5 text-[13px] text-silver transition-colors active:bg-line active:text-chalk"
+            className="rounded-[2px] border border-[var(--line-strong)] bg-raised px-3 py-1.5 text-[13px] text-silver transition-colors active:bg-edge active:text-paper"
           >
             {player.name}
           </button>

@@ -31,12 +31,12 @@ export function Headshot({
   return (
     <div className="relative mx-auto w-[min(56vw,190px)]">
       <div
-        className={`relative aspect-square overflow-hidden rounded-[26px] border bg-gradient-to-b from-white to-silver/70 transition-[border-color,box-shadow] duration-500 ${
+        className={`relative aspect-square overflow-hidden rounded-[4px] border bg-gradient-to-b from-white to-silver/70 transition-[border-color,box-shadow] duration-500 ${
           solved
             ? 'border-fiesta-teal/70 shadow-[0_0_0_1px_rgb(23_209_161_/_0.25),0_18px_50px_-18px_rgb(23_209_161_/_0.45)]'
             : lost
               ? 'border-fiesta-pink/60 shadow-[0_18px_50px_-20px_rgb(240_78_121_/_0.4)]'
-              : 'border-line-2 shadow-[0_18px_50px_-22px_rgb(0_0_0_/_0.9)]'
+              : 'border-[var(--line-strong)] shadow-[0_18px_50px_-22px_rgb(0_0_0_/_0.9)]'
         }`}
       >
         <Image
@@ -71,7 +71,7 @@ export function Headshot({
 
       {/* Puzzle-piece counter tucked into the frame's corner. */}
       {!done && (
-        <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 rounded-full border border-line-2 bg-ink px-2.5 py-1 font-mono text-[10px] tracking-widest text-silver-dim">
+        <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 rounded-[2px] border border-[var(--line-strong)] bg-ink px-2.5 py-1 font-display text-[10px] tracking-widest text-faint">
           {revealed}/{MAX_ROUNDS}
         </div>
       )}

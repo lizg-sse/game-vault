@@ -194,9 +194,12 @@ export function VaultGame({
               <button type="button" className="btn btn--primary" onClick={start}>
                 Open the vault
               </button>
-              {/* The vault's other game — see /higher-lower. */}
+              {/* The vault's other games — see /higher-lower and /six-clues. */}
               <Link href="/higher-lower" className="btn btn--ghost">
                 Higher / Lower →
+              </Link>
+              <Link href="/six-clues" className="btn btn--ghost">
+                Six Clues →
               </Link>
             </div>
           </Intro>

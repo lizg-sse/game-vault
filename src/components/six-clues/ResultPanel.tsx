@@ -30,7 +30,7 @@ function Countdown() {
   const total = Math.max(0, Math.floor(ms / 1000))
   const pad = (n: number) => String(n).padStart(2, '0')
   return (
-    <span className="font-mono tabular-nums">
+    <span className="font-display tabular-nums">
       {pad(Math.floor(total / 3600))}:{pad(Math.floor(total / 60) % 60)}:{pad(total % 60)}
     </span>
   )
@@ -67,23 +67,23 @@ export function ResultPanel({
 
   return (
     <div className="animate-pop-in space-y-3">
-      <div className="rounded-2xl border border-line bg-panel p-4 text-center">
+      <div className="rounded-[3px] border border-[var(--line)] bg-surface p-4 text-center">
         <p
-          className={`font-mono text-[10px] tracking-[0.16em] uppercase ${
+          className={`font-display text-[10px] tracking-[0.16em] uppercase ${
             won ? 'text-fiesta-teal' : 'text-fiesta-pink'
           }`}
         >
           {won ? `Solved in ${cluesRevealed(game)}` : 'Out of turns'}
         </p>
-        <h2 className="mt-1 text-[26px] leading-tight font-semibold tracking-tight text-chalk">
+        <h2 className="mt-1 text-[26px] leading-tight font-semibold tracking-tight text-paper">
           {player.name}
         </h2>
-        <p className="mt-1 text-[13px] text-silver-dim">
+        <p className="mt-1 text-[13px] text-faint">
           {player.position} · {formatHeight(player.height)}
           {player.jersey ? ` · #${player.jersey}` : ''}
         </p>
 
-        <div className="mt-3 grid grid-cols-3 gap-2 border-y border-line py-3">
+        <div className="mt-3 grid grid-cols-3 gap-2 border-y border-[var(--line)] py-3">
           {(
             [
               [player.ppg.toFixed(1), 'PPG'],
@@ -93,11 +93,11 @@ export function ResultPanel({
           ).map(([value, label]) => (
             <div key={label}>
               <p className="text-[17px] font-semibold tabular-nums">{value}</p>
-              <p className="font-mono text-[9px] tracking-widest text-silver-dim">{label}</p>
+              <p className="font-display text-[9px] tracking-widest text-faint">{label}</p>
             </div>
           ))}
         </div>
-        <p className="mt-2 text-[12px] text-silver-dim">
+        <p className="mt-2 text-[12px] text-faint">
           {tenureLabel(player)} · {player.games} games in silver &amp; black
         </p>
 
@@ -106,7 +106,7 @@ export function ResultPanel({
             {honours.map(a => (
               <span
                 key={a}
-                className="rounded-full bg-panel-2 px-2.5 py-1 text-[11px] text-silver ring-1 ring-line"
+                className="rounded-[2px] bg-raised px-2.5 py-1 text-[11px] text-silver ring-1 ring-[var(--line)]"
               >
                 {a}
               </span>
@@ -115,7 +115,7 @@ export function ResultPanel({
         )}
 
         {won && (
-          <p className="mt-3.5 font-mono text-[13px] tracking-wide text-fiesta-teal tabular-nums">
+          <p className="mt-3.5 font-display text-[13px] tracking-wide text-fiesta-teal tabular-nums">
             +{scoreFor(game)} pts
           </p>
         )}
@@ -124,7 +124,7 @@ export function ResultPanel({
       <div className="flex gap-2">
         <button
           onClick={share}
-          className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-silver py-3 text-[14px] font-semibold text-ink transition-opacity active:opacity-80"
+          className="flex flex-1 items-center justify-center gap-2 rounded-[3px] bg-silver py-3 text-[14px] font-semibold text-ink transition-opacity active:opacity-80"
         >
           {copied ? (
             'Copied!'
@@ -139,13 +139,13 @@ export function ResultPanel({
         </button>
         <button
           onClick={onStats}
-          className="rounded-2xl border border-line-2 bg-panel-2 px-5 text-[14px] font-medium text-silver active:bg-line"
+          className="rounded-[3px] border border-[var(--line-strong)] bg-raised px-5 text-[14px] font-medium text-silver active:bg-edge"
         >
           Stats
         </button>
       </div>
 
-      <p className="text-center text-[12px] text-silver-dim">
+      <p className="text-center text-[12px] text-faint">
         Next Spur in <Countdown />
       </p>
     </div>

@@ -196,7 +196,7 @@ export function shareText(game: GameState) {
     return turn.kind === 'skip' ? '🟨' : '⬛'
   })
 
-  const head = `Spurs Vault #${game.day + 1} · ${game.mode === 'easy' ? 'Easy' : 'Hard'}`
+  const head = `Six Clues #${game.day + 1} · ${game.mode === 'easy' ? 'Easy' : 'Hard'}`
   const line =
     game.status === 'won'
       ? `${cluesRevealed(game)}/${MAX_ROUNDS} clues · ${scoreFor(game)} pts`

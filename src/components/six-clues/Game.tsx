@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Player } from '@/lib/six-clues/players'
 import { buildClues, contradiction, stillInPlay } from '@/lib/six-clues/clues'
@@ -43,7 +44,7 @@ function IconButton({
     <button
       onClick={onClick}
       aria-label={label}
-      className="grid h-8 w-8 place-items-center rounded-full border border-line text-silver-dim transition-colors active:bg-panel-2 active:text-chalk"
+      className="grid h-8 w-8 place-items-center rounded-[2px] border border-[var(--line)] text-faint transition-colors active:bg-raised active:text-paper"
     >
       {children}
     </button>
@@ -55,7 +56,7 @@ function ModeToggle({ mode, onChange }: { mode: Mode; onChange: (m: Mode) => voi
     <div
       role="radiogroup"
       aria-label="Difficulty"
-      className="flex rounded-full border border-line bg-panel p-0.5"
+      className="flex rounded-[2px] border border-[var(--line)] bg-surface p-0.5"
     >
       {(['easy', 'hard'] as const).map(m => (
         <button
@@ -63,8 +64,8 @@ function ModeToggle({ mode, onChange }: { mode: Mode; onChange: (m: Mode) => voi
           role="radio"
           aria-checked={mode === m}
           onClick={() => onChange(m)}
-          className={`rounded-full px-2.5 py-1 text-[11px] font-semibold tracking-wide capitalize transition-colors ${
-            mode === m ? 'bg-silver text-ink' : 'text-silver-dim'
+          className={`rounded-[2px] px-2.5 py-1 text-[11px] font-semibold tracking-wide capitalize transition-colors ${
+            mode === m ? 'bg-silver text-ink' : 'text-faint'
           }`}
         >
           {m}
@@ -81,7 +82,7 @@ export function Game() {
     <Board />
   ) : (
     <div className="app-bg flex h-dvh items-center justify-center">
-      <p className="font-mono text-[11px] tracking-[0.2em] text-silver-dim uppercase">
+      <p className="font-display text-[11px] tracking-[0.2em] text-faint uppercase">
         Opening the vault…
       </p>
     </div>
@@ -203,13 +204,20 @@ function Board() {
 
   return (
     <div className="app-bg relative flex h-dvh flex-col">
-      <header className="relative z-10 flex items-center gap-2.5 border-b border-line px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2.5">
-        <div className="flex-1">
-          <h1 className="bg-gradient-to-b from-white to-silver bg-clip-text text-[15px] leading-none font-bold tracking-[0.12em] text-transparent uppercase">
-            Spurs Vault
+      <header className="relative z-10 flex items-center gap-2.5 border-b border-[var(--line)] px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2.5">
+        <div className="min-w-0 flex-1">
+          <Link
+            href="/"
+            className="font-display text-[10px] tracking-[0.18em] text-faint uppercase no-underline transition-colors hover:text-paper"
+          >
+            ← The Vault
+          </Link>
+          <h1 className="mt-0.5 font-display text-[16px] leading-none font-semibold tracking-[0.16em] text-paper uppercase">
+            Six Clues
           </h1>
-          <p className="mt-1 font-mono text-[10px] tracking-widest text-silver-dim">No. {day + 1}</p>
         </div>
+
+        <span className="font-display text-[10px] tracking-[0.16em] text-faint">No. {day + 1}</span>
 
         <ModeToggle mode={mode} onChange={switchMode} />
 
@@ -247,7 +255,7 @@ function Board() {
       </div>
 
       {!over && (
-        <div className="relative z-10 border-t border-line bg-ink-2/95 px-4 pt-3 pb-[max(0.85rem,env(safe-area-inset-bottom))] backdrop-blur">
+        <div className="relative z-10 border-t border-[var(--line)] bg-ink/95 px-4 pt-3 pb-[max(0.85rem,env(safe-area-inset-bottom))] backdrop-blur">
           <div className="mx-auto w-full max-w-md">
             <p aria-live="polite" className="sr-only">
               {revealed} of {MAX_ROUNDS} clues revealed.

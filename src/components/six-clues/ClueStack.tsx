@@ -24,12 +24,12 @@ export function ClueStack({
         {clues.slice(0, revealed).map(clue => (
           <li
             key={clue.key}
-            className="animate-clue-in rounded-2xl border border-line bg-panel px-3.5 py-2.5"
+            className="animate-clue-in rounded-[3px] border border-[var(--line)] bg-surface px-3.5 py-2.5"
           >
-            <p className="font-mono text-[10px] tracking-[0.14em] text-silver-dim uppercase">
+            <p className="font-display text-[10px] tracking-[0.14em] text-faint uppercase">
               {clue.label}
             </p>
-            <p className="mt-0.5 text-[15px] leading-snug font-semibold text-chalk">{clue.value}</p>
+            <p className="mt-0.5 text-[15px] leading-snug font-semibold text-paper">{clue.value}</p>
           </li>
         ))}
       </ol>
@@ -39,12 +39,12 @@ export function ClueStack({
           {clues.slice(revealed).map(clue => (
             <li
               key={clue.key}
-              className="flex items-center gap-2 rounded-2xl border border-dashed border-line px-3.5 py-2.5 opacity-45"
+              className="flex items-center gap-2 rounded-[3px] border border-dashed border-[var(--line)] px-3.5 py-2.5 opacity-45"
             >
-              <svg viewBox="0 0 16 16" className="h-3.5 w-3.5 shrink-0 text-silver-dim" fill="currentColor">
+              <svg viewBox="0 0 16 16" className="h-3.5 w-3.5 shrink-0 text-faint" fill="currentColor">
                 <path d="M8 1a3.2 3.2 0 0 0-3.2 3.2V6H4.4A1.4 1.4 0 0 0 3 7.4v5.2A1.4 1.4 0 0 0 4.4 14h7.2a1.4 1.4 0 0 0 1.4-1.4V7.4A1.4 1.4 0 0 0 11.6 6h-.4V4.2A3.2 3.2 0 0 0 8 1Zm1.8 5H6.2V4.2a1.8 1.8 0 1 1 3.6 0V6Z" />
               </svg>
-              <span className="font-mono text-[10px] tracking-[0.14em] text-silver-dim uppercase">
+              <span className="font-display text-[10px] tracking-[0.14em] text-faint uppercase">
                 {clue.label}
               </span>
             </li>
@@ -57,10 +57,10 @@ export function ClueStack({
           {notes.map((note, i) => (
             <li
               key={`${note.name}-${i}`}
-              className="flex items-baseline gap-2 rounded-xl bg-panel/60 px-3 py-2 text-[13px]"
+              className="flex items-baseline gap-2 rounded-[3px] bg-surface/60 px-3 py-2 text-[13px]"
             >
-              <span className="font-medium text-silver-dim line-through">{note.name}</span>
-              <span className="ml-auto text-right text-[11px] text-silver-dim/80">
+              <span className="font-medium text-faint line-through">{note.name}</span>
+              <span className="ml-auto text-right text-[11px] text-faint/80">
                 {note.ruledOutBy ? (
                   <>
                     ruled out by <span className="text-fiesta-pink/90">{note.ruledOutBy}</span>
