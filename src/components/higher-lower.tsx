@@ -125,7 +125,7 @@ export default function HigherLower() {
 
       <p className="text-center text-base font-semibold tracking-tight text-zinc-100 sm:text-2xl">
         Who{" "}
-        <span className="text-[var(--spurs-silver)]">{round.category.prompt}</span>{" "}
+        <span className="text-[var(--silver)]">{round.category.prompt}</span>{" "}
         for the Spurs?
       </p>
 
@@ -193,7 +193,7 @@ function Stat({ label, value, highlight }: { label: string; value: number; highl
     <div
       className={`min-w-24 rounded-xl border px-4 py-2 text-center ${
         highlight
-          ? "border-[var(--spurs-silver)]/40 bg-[var(--spurs-silver)]/10"
+          ? "border-[var(--silver)]/40 bg-[var(--silver)]/10"
           : "border-white/10 bg-white/5"
       }`}
     >
@@ -226,7 +226,7 @@ function PlayerCard({
   const isPicked = player.id === picked;
 
   const border = !revealed
-    ? "border-white/10 hover:border-[var(--spurs-silver)]/60 hover:bg-white/[0.07]"
+    ? "border-white/10 hover:border-[var(--silver)]/60 hover:bg-white/[0.07]"
     : isWinner
       ? "border-emerald-400/70 bg-emerald-400/10"
       : isPicked
@@ -282,7 +282,7 @@ function StartScreen({ best, onStart }: { best: number; onStart: () => void }) {
     <div className="mx-auto flex w-full max-w-xl flex-1 flex-col items-center justify-center gap-6 px-4 py-16 text-center">
       <div>
         <h1 className="text-4xl font-bold tracking-tight text-zinc-50 sm:text-5xl">
-          Higher <span className="text-[var(--spurs-silver)]">/</span> Lower
+          Higher <span className="text-[var(--silver)]">/</span> Lower
         </h1>
         <p className="mt-3 text-zinc-400">
           Two Spurs, one stat. Pick whoever put up the bigger number in silver and black — and
@@ -304,7 +304,7 @@ function StartScreen({ best, onStart }: { best: number; onStart: () => void }) {
       <button
         type="button"
         onClick={onStart}
-        className="rounded-full bg-[var(--spurs-silver)] px-8 py-3 text-base font-bold text-black transition hover:bg-white"
+        className="rounded-full bg-[var(--silver)] px-8 py-3 text-base font-bold text-black transition hover:bg-white"
       >
         Play
       </button>
@@ -363,7 +363,7 @@ function GameOver({
         <button
           type="button"
           onClick={onRestart}
-          className="mt-5 w-full rounded-full bg-[var(--spurs-silver)] px-6 py-3 font-bold text-black transition hover:bg-white"
+          className="mt-5 w-full rounded-full bg-[var(--silver)] px-6 py-3 font-bold text-black transition hover:bg-white"
         >
           Play again
         </button>

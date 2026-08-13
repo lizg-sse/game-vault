@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { Intro } from "./Intro";
 import { PlayerCard } from "./PlayerCard";
@@ -193,6 +194,10 @@ export function VaultGame({
               <button type="button" className="btn btn--primary" onClick={start}>
                 Open the vault
               </button>
+              {/* The vault's other game — see /higher-lower. */}
+              <Link href="/higher-lower" className="btn btn--ghost">
+                Higher / Lower →
+              </Link>
             </div>
           </Intro>
         )}
