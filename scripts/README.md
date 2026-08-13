@@ -46,3 +46,52 @@ external image requests.
 Season statistics: Basketball-Reference, 1973-74 through 2024-25.
 Portraits: Basketball-Reference and cdn.nba.com.
 Spur mark: the team's official primary logo geometry (cdn.nba.com).
+
+## 4 — Six Clues
+
+`4-build-six-clues.mjs` builds the guessing game's own dataset — one row per
+player rather than per player-season — into `src/lib/six-clues/players.ts`, with
+headshots in `public/six-clues/`.
+
+```bash
+node scripts/4-build-six-clues.mjs
+```
+
+Bios, draft details and jersey numbers come from nba.com player pages; games,
+seasons and per-game averages with the Spurs from the franchise register;
+accolades from each player's Basketball-Reference page (nba.com reports zero
+All-Star selections for active players, so it can't be trusted for those); and
+championships from the title-season roster tables.
+
+### Headshots
+
+The game is a photo reveal, so the picture has to be the player in a Spurs
+jersey from a season he actually played here. Three sources, in order:
+
+1. **The team-and-season archive** on `ak-static.cms.nba.com`, keyed by team id
+   and season. It verifies the pairing — asking for a non-Spur under the Spurs
+   team id returns 403 — so a hit is certainly the right player in the right
+   uniform. Coverage starts at 2015-16.
+2. **nba.com's `latest` headshot**, but only when nba.com itself files the
+   player under San Antonio, which means the photo it holds is a Spurs one.
+   `PREFER_NBA_HEADSHOT` in the script lists the handful of players where that
+   rule misses and the photo was checked by eye instead.
+3. **Basketball-Reference portraits** — 120×180 and low resolution, but frozen
+   in the right decade. This is where the pre-2015 Spurs come from.
+
+`latest` on its own is never used unqualified: it shows whichever team a player
+finished with, which would put Kawhi Leonard in a Clippers jersey.
+
+Two quirks of the archive host, both handled in the script: it rejects Node's
+`fetch` on client fingerprinting while answering `curl` normally, and it rate
+limits hard enough to blackhole an IP for several minutes, so those requests are
+serialised behind a 2.5s throttle.
+
+Anyone with no real photo from any source is dropped — 14 of the 98 candidates,
+all deep cuts. nba.com serves one shared silhouette for players it has no
+picture of; it's detected by hash and rejected.
+
+Championship credit comes from the title-season roster tables, which include
+players traded away before the Finals. Counts are cross-checked against each
+player's career ring total and the script throws if a new discrepancy appears;
+`NOT_ON_THE_TITLE_TEAM` records the one correction (Malik Rose, 2005).
