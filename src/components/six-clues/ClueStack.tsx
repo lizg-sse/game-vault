@@ -1,7 +1,7 @@
 'use client'
 
-import type { Clue } from '@/lib/clues'
-import { MAX_ROUNDS } from '@/lib/game'
+import type { Clue } from '@/lib/six-clues/clues'
+import { MAX_ROUNDS } from '@/lib/six-clues/game'
 
 export type GuessNote = {
   name: string

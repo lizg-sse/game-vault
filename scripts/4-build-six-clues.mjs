@@ -1,5 +1,5 @@
 /**
- * Rebuilds the Spurs Vault dataset: `src/lib/players.ts` and `public/headshots/`.
+ * Rebuilds the Spurs Vault dataset: `src/lib/six-clues/players.ts` and `public/six-clues/`.
  *
  *   node scripts/build-players.mjs
  *
@@ -298,7 +298,7 @@ async function main() {
   for (const buf of nbaShots) if (buf) seen.set(sha1(buf), (seen.get(sha1(buf)) ?? 0) + 1)
   const placeholders = new Set([...seen].filter(([, n]) => n > 1).map(([h]) => h))
 
-  const imageDir = path.join(ROOT, 'public/headshots')
+  const imageDir = path.join(ROOT, 'public/six-clues')
   fs.rmSync(imageDir, { recursive: true, force: true })
   fs.mkdirSync(imageDir, { recursive: true })
 
@@ -391,7 +391,7 @@ async function main() {
 //   Spurs games/averages/seasons          — basketball-reference ${TEAM} franchise register
 //   accolades (All-Star, All-NBA, …)      — basketball-reference player pages
 //   \`titles\`                              — basketball-reference ${TEAM} championship rosters
-//   public/headshots/<id>.webp            — cdn.nba.com, falling back to basketball-reference
+//   public/six-clues/<id>.webp            — cdn.nba.com, falling back to basketball-reference
 //
 // Every player here has a verified, non-placeholder headshot.
 // tier 1 = widely-known Spurs (the pool for the default Easy mode)
@@ -436,7 +436,7 @@ export type Player = {
 export const PLAYERS: Player[] = ${JSON.stringify(players, null, 2)}
 `
 
-  fs.writeFileSync(path.join(ROOT, 'src/lib/players.ts'), generated)
+  fs.writeFileSync(path.join(ROOT, 'src/lib/six-clues/players.ts'), generated)
 
   console.log(
     `\n${players.length} players — tier 1: ${players.filter(p => p.tier === 1).length}, tier 2: ${players.filter(p => p.tier === 2).length}`

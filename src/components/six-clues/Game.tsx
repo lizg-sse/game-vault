@@ -1,9 +1,9 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import type { Player } from '@/lib/players'
-import { buildClues, contradiction, stillInPlay } from '@/lib/clues'
-import { useIsClient } from '@/lib/useIsClient'
+import type { Player } from '@/lib/six-clues/players'
+import { buildClues, contradiction, stillInPlay } from '@/lib/six-clues/clues'
+import { useIsClient } from '@/lib/six-clues/useIsClient'
 import {
   MAX_ROUNDS,
   cluesRevealed,
@@ -21,7 +21,7 @@ import {
   saveSeenHelp,
   type GameState,
   type Mode,
-} from '@/lib/game'
+} from '@/lib/six-clues/game'
 import { ClueStack, type GuessNote } from './ClueStack'
 import { GuessBar } from './GuessBar'
 import { Headshot } from './Headshot'

@@ -5,7 +5,7 @@
 //   Spurs games/averages/seasons          — basketball-reference SAS franchise register
 //   accolades (All-Star, All-NBA, …)      — basketball-reference player pages
 //   `titles`                              — basketball-reference SAS championship rosters
-//   public/headshots/<id>.webp            — cdn.nba.com, falling back to basketball-reference
+//   public/six-clues/<id>.webp            — cdn.nba.com, falling back to basketball-reference
 //
 // Every player here has a verified, non-placeholder headshot.
 // tier 1 = widely-known Spurs (the pool for the default Easy mode)

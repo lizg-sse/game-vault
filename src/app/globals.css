@@ -1,150 +1,26 @@
 @import "tailwindcss";
 
-/*
-  Spurs Vault runs in a single dark treatment on purpose: silver-and-black is the
-  team's identity, and the headshot reveal is tuned against a dark ground. The
-  accents are the Fiesta palette from the team's alternate kits.
-*/
-@theme {
-  --color-ink: #08090b;
-  --color-ink-2: #0d0f12;
-  --color-panel: #121418;
-  --color-panel-2: #191d22;
-  --color-line: #242931;
-  --color-line-2: #333943;
-  --color-silver: #c4ced4;
-  --color-silver-dim: #7f8890;
-  --color-chalk: #f3f5f7;
-  --color-fiesta-pink: #f04e79;
-  --color-fiesta-teal: #17d1a1;
-  --color-fiesta-orange: #ffb43f;
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
 
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-
-  --ease-out-back: cubic-bezier(0.2, 0.9, 0.3, 1.4);
 }
 
-:root {
-  color-scheme: dark;
-}
-
-html {
-  -webkit-text-size-adjust: 100%;
-  background: var(--color-ink);
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
 }
 
 body {
-  background: var(--color-ink);
-  color: var(--color-chalk);
-  font-family: var(--font-sans), system-ui, sans-serif;
-  /* Stops the whole page rubber-banding on iOS while sheets scroll internally. */
-  overscroll-behavior-y: none;
-}
-
-/* A faint court-glow so the flat black doesn't read as dead space. */
-.app-bg::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(70% 45% at 50% -8%, rgb(196 206 212 / 0.11), transparent 70%),
-    radial-gradient(45% 30% at 92% 8%, rgb(240 78 121 / 0.06), transparent 70%);
-}
-
-button {
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* Focus rings only for keyboard users, never on touch taps. */
-:focus-visible {
-  outline: 2px solid var(--color-silver);
-  outline-offset: 2px;
-  border-radius: 6px;
-}
-
-input[type="text"]::-webkit-search-cancel-button {
-  display: none;
-}
-
-@keyframes clue-in {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-@keyframes sheet-in {
-  from {
-    transform: translateY(100%);
-  }
-  to {
-    transform: none;
-  }
-}
-
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes pop-in {
-  0% {
-    opacity: 0;
-    transform: scale(0.94);
-  }
-  100% {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-@keyframes shake {
-  10%,
-  90% {
-    transform: translateX(-2px);
-  }
-  30%,
-  70% {
-    transform: translateX(4px);
-  }
-  50% {
-    transform: translateX(-4px);
-  }
-}
-
-.animate-clue-in {
-  animation: clue-in 0.34s var(--ease-out-back) both;
-}
-.animate-sheet-in {
-  animation: sheet-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-.animate-fade-in {
-  animation: fade-in 0.2s ease-out both;
-}
-.animate-pop-in {
-  animation: pop-in 0.45s var(--ease-out-back) both;
-}
-.animate-shake {
-  animation: shake 0.4s ease-in-out;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .animate-clue-in,
-  .animate-sheet-in,
-  .animate-fade-in,
-  .animate-pop-in,
-  .animate-shake {
-    animation-duration: 0.01ms;
-    animation-iteration-count: 1;
-  }
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
 }

@@ -1,8 +1,8 @@
 'use client'
 
 import Image from 'next/image'
-import type { Player } from '@/lib/players'
-import { MAX_ROUNDS } from '@/lib/game'
+import type { Player } from '@/lib/six-clues/players'
+import { MAX_ROUNDS } from '@/lib/six-clues/game'
 
 /**
  * Blur in px and black-tint opacity for 1…6 clues on the table. Headshots sit on a
@@ -40,7 +40,7 @@ export function Headshot({
         }`}
       >
         <Image
-          src={`/headshots/${player.id}.webp`}
+          src={`/six-clues/${player.id}.webp`}
           alt={done ? player.name : 'Obscured photo of the mystery Spur'}
           width={512}
           height={512}

@@ -1,6 +1,6 @@
 'use client'
 
-import { MAX_ROUNDS, type Mode, type Stats } from '@/lib/game'
+import { MAX_ROUNDS, type Mode, type Stats } from '@/lib/six-clues/game'
 import { Sheet } from './Sheet'
 
 function Figure({ value, label }: { value: string | number; label: string }) {

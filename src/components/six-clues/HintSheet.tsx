@@ -1,6 +1,6 @@
 'use client'
 
-import type { Player } from '@/lib/players'
+import type { Player } from '@/lib/six-clues/players'
 import { Sheet } from './Sheet'
 
 /**

@@ -1,8 +1,8 @@
 'use client'
 
 import { useId, useRef, useState } from 'react'
-import type { Player } from '@/lib/players'
-import { searchPlayers, MAX_ROUNDS, type Turn } from '@/lib/game'
+import type { Player } from '@/lib/six-clues/players'
+import { searchPlayers, MAX_ROUNDS, type Turn } from '@/lib/six-clues/game'
 
 function Pips({ turns, status }: { turns: Turn[]; status: 'playing' | 'won' | 'lost' }) {
   return (

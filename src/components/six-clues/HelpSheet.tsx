@@ -1,6 +1,6 @@
 'use client'
 
-import { MAX_ROUNDS, SCORE_BY_CLUES } from '@/lib/game'
+import { MAX_ROUNDS, SCORE_BY_CLUES } from '@/lib/six-clues/game'
 import { Sheet } from './Sheet'
 
 function Step({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {

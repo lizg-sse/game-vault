@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import type { Player } from '@/lib/players'
-import { formatHeight, tenureLabel } from '@/lib/clues'
-import { cluesRevealed, msUntilTomorrow, scoreFor, shareText, type GameState } from '@/lib/game'
+import type { Player } from '@/lib/six-clues/players'
+import { formatHeight, tenureLabel } from '@/lib/six-clues/clues'
+import { cluesRevealed, msUntilTomorrow, scoreFor, shareText, type GameState } from '@/lib/six-clues/game'
 
 function accolades(p: Player) {
   const out: string[] = []
