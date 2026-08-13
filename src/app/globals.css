@@ -1,21 +1,1705 @@
 @import "tailwindcss";
 
+@layer reset, base, layout, components, utilities;
+
+/* ============================================================
+   TOKENS
+   Silver #C4CED4 and black are the Spurs' actual primaries.
+   The Fiesta trio (pink / orange / teal) comes off the 1989–2002
+   jerseys and the current City edition — used only as accents.
+   ============================================================ */
+
 :root {
-  --background: #08090b;
-  --foreground: #ededed;
-  --spurs-silver: #c4ced4;
+  color-scheme: dark;
+
+  /* Tier 1 — literal */
+  --ink-950: #060708;
+  --ink-900: #0a0b0d;
+  --ink-850: #0f1114;
+  --ink-800: #14171a;
+  --ink-700: #1c2025;
+  --ink-600: #262b31;
+
+  --silver: #c4ced4;
+  --silver-mid: #96a1a8;
+  --silver-dim: #6b747a;
+  --paper: #f2f5f6;
+
+  --fiesta-pink: #ef426f;
+  --fiesta-orange: #ff8200;
+  --fiesta-teal: #00b2a9;
+
+  /* Tier 2 — semantic */
+  --bg: var(--ink-950);
+  --surface: var(--ink-850);
+  --surface-raised: var(--ink-800);
+  --text: var(--paper);
+  --text-muted: var(--silver-mid);
+  --text-faint: var(--silver-dim);
+  --accent: var(--silver);
+
+  --line: color-mix(in oklab, var(--silver) 13%, transparent);
+  --line-strong: color-mix(in oklab, var(--silver) 30%, transparent);
+  --line-hot: color-mix(in oklab, var(--silver) 62%, transparent);
+
+  /* Tier 3 — UI */
+  --radius: 3px;
+  --radius-lg: 5px;
+  --gutter: clamp(1rem, 4vw, 2.5rem);
+  --shell: 78rem;
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --dur: 260ms;
+
+  --font-display: var(--font-oswald), "Arial Narrow", sans-serif;
+  --font-ui: var(--font-inter), system-ui, sans-serif;
+
+  /* Single-colour spur, used as a watermark behind card content. */
+  --spur-mask: url("/brand/spur-silhouette.svg");
+  --figure-mask: url("/brand/figure-mask.png");
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-spurs-silver: var(--spurs-silver);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-inter);
+  --color-bg: var(--bg);
+  --color-silver: var(--silver);
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+/* ============================================================
+   BASE
+   ============================================================ */
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    min-block-size: 100dvh;
+    margin: 0;
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-ui);
+    font-size: 1rem;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Court-floor vignette + a faint grain so flat black doesn't look dead. */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    background:
+      radial-gradient(
+        120% 80% at 50% -10%,
+        color-mix(in oklab, var(--silver) 7%, transparent),
+        transparent 60%
+      ),
+      radial-gradient(90% 60% at 50% 110%, color-mix(in oklab, var(--ink-700) 70%, transparent), transparent 70%),
+      var(--bg);
+  }
+
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    opacity: 0.035;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  :where(h1, h2, h3, h4) {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 1.02;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  :where(p) {
+    margin: 0;
+    text-wrap: pretty;
+  }
+
+  :where(button) {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+
+  :where(a) {
+    color: var(--silver);
+    text-underline-offset: 0.2em;
+  }
+
+  :where(:focus-visible) {
+    outline: 2px solid var(--silver);
+    outline-offset: 3px;
+  }
+
+  :where(img) {
+    max-inline-size: 100%;
+    display: block;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--fiesta-teal) 55%, transparent);
+    color: var(--paper);
+  }
+}
+
+/* ============================================================
+   TYPE UTILITIES
+   ============================================================ */
+
+@layer utilities {
+  .eyebrow {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(0.625rem, 0.9vw, 0.72rem);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+
+  .num {
+    font-family: var(--font-display);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+
+  .visually-hidden {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+
+@layer layout {
+  .shell {
+    inline-size: min(100% - var(--gutter) * 2, var(--shell));
+    margin-inline: auto;
+  }
+
+  .app {
+    display: flex;
+    flex-direction: column;
+    min-block-size: 100dvh;
+  }
+
+  .app > main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-block: clamp(1.5rem, 4vw, 3rem);
+  }
+}
+
+/* ============================================================
+   MASTHEAD
+   ============================================================ */
+
+@layer components {
+  .masthead {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: 30;
+    border-block-end: 1px solid var(--line);
+    background: color-mix(in oklab, var(--ink-950) 88%, transparent);
+    backdrop-filter: blur(14px) saturate(1.2);
+  }
+
+  .masthead__inner {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    block-size: 3.5rem;
+  }
+
+  .masthead__mark {
+    inline-size: 1.75rem;
+    flex: none;
+  }
+
+  .masthead__title {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.0625rem;
+    letter-spacing: 0.19em;
+    text-transform: uppercase;
+    color: var(--paper);
+  }
+
+  .masthead__title span {
+    color: var(--silver-dim);
+    font-weight: 400;
+  }
+
+  .masthead__meta {
+    margin-inline-start: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .masthead__pips {
+    display: flex;
+    gap: 5px;
+  }
+
+  .pip {
+    inline-size: 0.5rem;
+    block-size: 0.5rem;
+    border: 1px solid var(--line-strong);
+    transform: rotate(45deg);
+    transition: background-color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+  }
+
+  .pip[data-state="done"] {
+    background: var(--silver);
+    border-color: var(--silver);
+  }
+
+  .pip[data-state="active"] {
+    border-color: var(--silver);
+    background: color-mix(in oklab, var(--silver) 30%, transparent);
+  }
+}
+
+/* ============================================================
+   INTRO
+   ============================================================ */
+
+@layer components {
+  .intro {
+    display: grid;
+    gap: clamp(1.75rem, 4vw, 2.75rem);
+    place-content: center;
+    text-align: center;
+    flex: 1;
+    padding-block: clamp(1rem, 6vh, 4rem);
+  }
+
+  .intro__crest {
+    inline-size: clamp(4.5rem, 13vw, 6.5rem);
+    margin-inline: auto;
+    filter: drop-shadow(0 0 40px color-mix(in oklab, var(--silver) 28%, transparent));
+  }
+
+  .intro__title {
+    font-size: clamp(3.25rem, 15vw, 8rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 0.86;
+    text-transform: uppercase;
+    background: linear-gradient(175deg in oklab, var(--paper) 8%, var(--silver) 52%, var(--silver-dim) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .intro__rule {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.9rem;
+  }
+
+  .intro__rule::before,
+  .intro__rule::after {
+    content: "";
+    block-size: 1px;
+    inline-size: clamp(2.5rem, 12vw, 7rem);
+    background: linear-gradient(to right, transparent, var(--line-strong));
+  }
+
+  .intro__rule::after {
+    scale: -1 1;
+  }
+
+  /* Small silver lozenge between the two rules. */
+  .intro__rule > span {
+    inline-size: 0.4rem;
+    block-size: 0.4rem;
+    rotate: 45deg;
+    background: var(--silver);
+    opacity: 0.55;
+  }
+
+  .intro__lede {
+    max-inline-size: 42ch;
+    margin-inline: auto;
+    color: var(--text-muted);
+    font-size: clamp(0.95rem, 1.6vw, 1.0625rem);
+    line-height: 1.6;
+  }
+
+  .intro__lede strong {
+    color: var(--paper);
+    font-weight: 600;
+  }
+
+  .intro__steps {
+    display: grid;
+    gap: 1px;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    background: var(--line);
+    border: 1px solid var(--line);
+    max-inline-size: 46rem;
+    margin-inline: auto;
+    text-align: start;
+  }
+
+  .intro__step {
+    background: var(--surface);
+    padding: 1.125rem 1.25rem;
+    display: grid;
+    gap: 0.3rem;
+  }
+
+  .intro__step b {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--silver);
+    line-height: 1;
+  }
+
+  .intro__step span {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    line-height: 1.45;
+  }
+
+  .intro__note {
+    font-size: 0.75rem;
+    color: var(--text-faint);
+  }
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+
+@layer components {
+  .btn {
+    --btn-bg: transparent;
+    --btn-fg: var(--paper);
+    --btn-line: var(--line-strong);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    min-block-size: 2.875rem;
+    padding-inline: 1.5rem;
+    background: var(--btn-bg);
+    color: var(--btn-fg);
+    border: 1px solid var(--btn-line);
+    border-radius: var(--radius);
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 0.8125rem;
+    letter-spacing: 0.17em;
+    text-transform: uppercase;
+    transition: background-color var(--dur) var(--ease), border-color var(--dur) var(--ease),
+      color var(--dur) var(--ease), translate var(--dur) var(--ease);
+  }
+
+  .btn:hover:not(:disabled) {
+    --btn-line: var(--line-hot);
+    background: color-mix(in oklab, var(--silver) 8%, transparent);
+  }
+
+  .btn:active:not(:disabled) {
+    translate: 0 1px;
+  }
+
+  .btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .btn--primary {
+    --btn-bg: var(--silver);
+    --btn-fg: var(--ink-950);
+    --btn-line: var(--silver);
+    font-weight: 600;
+  }
+
+  .btn--primary:hover:not(:disabled) {
+    --btn-bg: var(--paper);
+    --btn-line: var(--paper);
+    background: var(--paper);
+  }
+
+  .btn--ghost {
+    --btn-line: transparent;
+    color: var(--text-muted);
+    padding-inline: 0.75rem;
+    letter-spacing: 0.14em;
+  }
+
+  .btn--ghost:hover:not(:disabled) {
+    color: var(--paper);
+  }
+
+  @media (pointer: coarse) {
+    .btn {
+      min-block-size: 3rem;
+    }
+  }
+}
+
+/* ============================================================
+   SEASON PLATE
+   ============================================================ */
+
+@layer components {
+  .stage {
+    display: grid;
+    gap: clamp(1.25rem, 3vw, 2rem);
+    scroll-margin-block-start: 4.5rem;
+  }
+
+  .plate {
+    display: grid;
+    gap: 0.75rem;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .plate__round {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .plate__round::before,
+  .plate__round::after {
+    content: "";
+    inline-size: 1.5rem;
+    block-size: 1px;
+    background: var(--line-strong);
+  }
+
+  .plate__year {
+    font-size: clamp(3rem, 11vw, 6rem);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 0.85;
+    color: var(--paper);
+    font-variant-numeric: lining-nums tabular-nums;
+  }
+
+  .plate__year sup {
+    font-size: 0.22em;
+    vertical-align: 0.9em;
+    letter-spacing: 0.2em;
+    color: var(--fiesta-orange);
+    font-weight: 500;
+    margin-inline-start: 0.35em;
+  }
+
+  .plate__facts {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+  }
+
+  .plate__facts b {
+    color: var(--paper);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .plate__facts .sep {
+    inline-size: 3px;
+    block-size: 3px;
+    border-radius: 50%;
+    background: var(--silver-dim);
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.2rem 0.55rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 2px;
+    font-family: var(--font-display);
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .chip--title {
+    color: var(--ink-950);
+    background: linear-gradient(100deg in oklab, var(--silver), var(--paper) 55%, var(--silver));
+    border-color: transparent;
+  }
+
+  .chip--finals {
+    color: var(--fiesta-orange);
+    border-color: color-mix(in oklab, var(--fiesta-orange) 45%, transparent);
+  }
+
+  .chip--aba {
+    color: var(--fiesta-teal);
+    border-color: color-mix(in oklab, var(--fiesta-teal) 45%, transparent);
+  }
+}
+
+/* ============================================================
+   PLAYER CARDS
+   A figure standing in the dark behind the season's numbers.
+   Blacked out until you commit; the lights come up on the pick.
+   ============================================================ */
+
+@layer components {
+  .board {
+    display: grid;
+    gap: clamp(0.75rem, 1.6vw, 1.125rem);
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (max-width: 56rem) {
+    .board {
+      grid-template-columns: 1fr;
+      max-inline-size: 30rem;
+      margin-inline: auto;
+    }
+  }
+
+  .card {
+    --card-line: var(--line);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-block-size: 23rem;
+    padding: 1.125rem;
+    text-align: start;
+    overflow: hidden;
+    isolation: isolate;
+    border: 1px solid var(--card-line);
+    border-radius: var(--radius-lg);
+    background: linear-gradient(180deg in oklab, var(--ink-800), var(--ink-950) 74%);
+    transition: border-color var(--dur) var(--ease), translate var(--dur) var(--ease),
+      box-shadow var(--dur) var(--ease), opacity var(--dur) var(--ease);
+  }
+
+  /* Stacked on small screens, so keep the cards short enough that two are
+     visible at once and the choice stays a comparison. */
+  @media (max-width: 56rem) {
+    .card {
+      min-block-size: 17.5rem;
+    }
+
+    .portrait {
+      inset-block-start: 1.75rem;
+      block-size: 66%;
+    }
+
+    .card__stats {
+      margin-block-start: 1rem;
+    }
+  }
+
+  /* Spur bleeding out of the bottom-right corner. */
+  .card::after {
+    content: "";
+    position: absolute;
+    inset-block-end: -20%;
+    inset-inline-end: -16%;
+    inline-size: 54%;
+    aspect-ratio: 1;
+    z-index: -3;
+    opacity: 0.04;
+    background: var(--spur-mask) center / contain no-repeat;
+    transition: opacity var(--dur) var(--ease);
+  }
+
+  .card:where(:hover, :focus-visible):not([data-locked="true"]) {
+    --card-line: var(--line-hot);
+    translate: 0 -3px;
+    box-shadow: 0 18px 44px -26px rgb(0 0 0 / 0.95);
+  }
+
+  .card:where(:hover, :focus-visible):not([data-locked="true"])::after {
+    opacity: 0.08;
+  }
+
+  .card[data-state="picked"] {
+    --card-line: var(--silver);
+    background: linear-gradient(
+      180deg in oklab,
+      color-mix(in oklab, var(--silver) 12%, var(--ink-800)),
+      var(--ink-950) 76%
+    );
+  }
+
+  .card[data-state="passed"] {
+    opacity: 0.38;
+    filter: saturate(0.25);
+  }
+
+  /* --- head --- */
+
+  .card__head {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-block-end: auto;
+  }
+
+  .card__letter {
+    display: grid;
+    place-items: center;
+    inline-size: 1.625rem;
+    block-size: 1.625rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 2px;
+    font-family: var(--font-display);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--silver);
+    transition: background-color var(--dur) var(--ease), color var(--dur) var(--ease),
+      border-color var(--dur) var(--ease);
+  }
+
+  .card[data-state="picked"] .card__letter {
+    background: var(--silver);
+    border-color: var(--silver);
+    color: var(--ink-950);
+  }
+
+  .card__role {
+    font-family: var(--font-display);
+    font-size: 0.625rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+
+  .card__age {
+    margin-inline-start: auto;
+    font-size: 0.6875rem;
+    color: var(--text-faint);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .card[data-state="picked"] .card__age {
+    visibility: hidden;
+  }
+
+  /* ---------- the figure ----------
+     Full-bleed behind the numbers, fading into the card. Before the pick it is
+     a photographic blackout — the SAME figure on every card in every round,
+     cut from a player who never suited up for San Antonio, so the shape can
+     never hint at the answer. */
+
+  .portrait {
+    position: absolute;
+    inset-block-start: 2.25rem;
+    inset-inline: 0;
+    block-size: 64%;
+    z-index: -2;
+    display: grid;
+    place-items: start center;
+    pointer-events: none;
+  }
+
+  .portrait__figure {
+    grid-area: 1 / 1;
+    inline-size: 100%;
+    block-size: 100%;
+    /* Darker than the card it stands against, with a whisper of light
+       across the top of the head so the edge still reads. */
+    background: linear-gradient(
+      168deg in oklab,
+      color-mix(in oklab, var(--silver) 9%, #000) 0%,
+      color-mix(in oklab, var(--silver) 3%, #000) 34%,
+      #000 78%
+    );
+    filter: drop-shadow(0 0 14px color-mix(in oklab, var(--silver) 9%, transparent));
+    -webkit-mask:
+      var(--figure-mask) center bottom / auto 116% no-repeat,
+      linear-gradient(to bottom, #000 62%, transparent 97%);
+    mask:
+      var(--figure-mask) center bottom / auto 116% no-repeat,
+      linear-gradient(to bottom, #000 62%, transparent 97%);
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+    transition: opacity 700ms var(--ease), scale 1100ms var(--ease);
+  }
+
+  .card:where(:hover, :focus-visible):not([data-locked="true"]) .portrait__figure {
+    scale: 1.02;
+  }
+
+  /* Lights up: the blackout dissolves off the archive photo underneath. */
+  .portrait:not([data-portrait="redacted"]) .portrait__figure {
+    opacity: 0;
+    scale: 1.06;
+  }
+
+  .portrait__photo {
+    grid-area: 1 / 1;
+    inline-size: 100%;
+    block-size: 100%;
+    max-inline-size: 11.5rem;
+    justify-self: center;
+    object-fit: contain;
+    object-position: center top;
+    /* Archive photos span five decades, several teams and both leagues, so
+       everything runs monochrome and underlit to hold together as one set —
+       and so the numbers stay readable on top. */
+    filter: grayscale(1) brightness(0.74) contrast(1.22);
+    /* Fade all four edges so the photo dissolves into the card rather than
+       sitting on it as a rectangle. */
+    -webkit-mask:
+      linear-gradient(to bottom, #000 52%, transparent 94%),
+      linear-gradient(to right, transparent, #000 14%, #000 86%, transparent);
+    mask:
+      linear-gradient(to bottom, #000 52%, transparent 94%),
+      linear-gradient(to right, transparent, #000 14%, #000 86%, transparent);
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+    animation: portrait-in 900ms var(--ease) both;
+  }
+
+  /* Vignette that keeps the face lit and drops everything else into the card. */
+  .card__portrait:not([data-portrait="redacted"])::after {
+    content: "";
+    grid-area: 1 / 1;
+    align-self: stretch;
+    justify-self: stretch;
+    background:
+      radial-gradient(
+        62% 46% at 50% 30%,
+        transparent 28%,
+        color-mix(in oklab, var(--ink-950) 82%, transparent) 100%
+      ),
+      linear-gradient(to bottom, transparent 30%, var(--ink-950) 90%);
+    animation: veil-in 900ms var(--ease) both;
+  }
+
+  @keyframes veil-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes portrait-in {
+    from {
+      opacity: 0;
+      scale: 1.07;
+      filter: grayscale(1) brightness(0.05) contrast(2);
+    }
+    to {
+      opacity: 1;
+      scale: 1;
+      filter: grayscale(1) brightness(0.74) contrast(1.22);
+    }
+  }
+
+  /* One silver pass across the card as it opens. */
+  .portrait__sweep {
+    grid-area: 1 / 1;
+    inline-size: 100%;
+    block-size: 100%;
+    opacity: 0;
+    background: linear-gradient(
+      104deg in oklab,
+      transparent 40%,
+      color-mix(in oklab, var(--silver) 38%, transparent) 50%,
+      transparent 60%
+    );
+  }
+
+  .card__portrait:not([data-portrait="redacted"]) .portrait__sweep {
+    animation: portrait-sweep 950ms var(--ease) 60ms 1 both;
+  }
+
+  @keyframes portrait-sweep {
+    from {
+      opacity: 0;
+      translate: -130% 0;
+    }
+    28% {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+      translate: 130% 0;
+    }
+  }
+
+  /* Nothing on file — the crest stands in. */
+  .portrait__crest {
+    grid-area: 1 / 1;
+    align-self: center;
+    inline-size: 34%;
+    color: var(--silver);
+    opacity: 0.16;
+    --mark-cut: transparent;
+    animation: portrait-in 900ms var(--ease) both;
+  }
+
+  .portrait__note {
+    grid-area: 1 / 1;
+    align-self: end;
+    font-family: var(--font-display);
+    font-size: 0.5625rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--silver-dim);
+    opacity: 0.7;
+  }
+
+  /* --- numbers --- */
+
+  .card__stats {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.125rem;
+    margin-block-start: 1.5rem;
+    text-shadow: 0 2px 22px rgb(0 0 0 / 0.95), 0 0 8px rgb(0 0 0 / 0.7);
+  }
+
+  .stat {
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .stat__value {
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 0.9;
+    color: var(--paper);
+    font-variant-numeric: tabular-nums;
+    font-size: 1.5rem;
+  }
+
+  .stat--lead .stat__value {
+    font-size: clamp(2.375rem, 4.8vw, 3.125rem);
+    letter-spacing: -0.025em;
+  }
+
+  .stat__label {
+    font-family: var(--font-display);
+    font-size: 0.625rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--silver-dim);
+  }
+
+  .stat--lead .stat__label {
+    color: var(--silver);
+  }
+
+  .card__context {
+    margin-block-start: 0.875rem;
+    padding-block-start: 0.75rem;
+    border-block-start: 1px solid var(--line);
+    font-size: 0.6875rem;
+    letter-spacing: 0.03em;
+    color: var(--text-faint);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* --- identity --- */
+
+  .card__name {
+    display: grid;
+    gap: 0.1rem;
+    margin-block-start: 0.75rem;
+  }
+
+  .card[data-revealed="true"] .card__name {
+    animation: name-in 520ms var(--ease) 260ms both;
+  }
+
+  @keyframes name-in {
+    from {
+      opacity: 0;
+      translate: 0 8px;
+    }
+  }
+
+  .card__name b {
+    font-family: var(--font-display);
+    font-size: clamp(1.0625rem, 2.1vw, 1.3125rem);
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    color: var(--silver-dim);
+    line-height: 1.12;
+    transition: color 400ms var(--ease);
+  }
+
+  .card[data-revealed="true"] .card__name b {
+    color: var(--paper);
+  }
+
+  .card__name > span {
+    font-size: 0.6875rem;
+    color: var(--text-faint);
+  }
+
+  /* --- signed stamp --- */
+
+  .card__stamp {
+    position: absolute;
+    inset-block-start: 0.875rem;
+    inset-inline-end: 0.875rem;
+    z-index: 2;
+    padding: 0.2rem 0.5rem;
+    border-radius: 2px;
+    background: var(--silver);
+    color: var(--ink-950);
+    font-family: var(--font-display);
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    rotate: -4deg;
+    opacity: 0;
+    scale: 1.7;
+    transition: opacity 320ms var(--ease) 420ms, scale 380ms var(--ease) 420ms;
+  }
+
+  .card[data-state="picked"][data-revealed="true"] .card__stamp {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+/* ============================================================
+   ROUND FOOTER (continue bar)
+   ============================================================ */
+
+@layer components {
+  .verdict {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.125rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+  }
+
+  .verdict__text {
+    display: grid;
+    gap: 0.2rem;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+
+  .verdict__text b {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    color: var(--paper);
+  }
+
+  .verdict__text em {
+    font-style: normal;
+    color: var(--silver);
+  }
+}
+
+/* ============================================================
+   ROSTER RAIL
+   ============================================================ */
+
+@layer components {
+  .rail {
+    position: sticky;
+    inset-block-end: 0;
+    z-index: 20;
+    border-block-start: 1px solid var(--line);
+    background: color-mix(in oklab, var(--ink-950) 92%, transparent);
+    backdrop-filter: blur(14px);
+  }
+
+  .rail__inner {
+    display: flex;
+    align-items: center;
+    gap: clamp(0.5rem, 2vw, 1rem);
+    padding-block: 0.75rem;
+  }
+
+  .rail__label {
+    flex: none;
+  }
+
+  @media (max-width: 40rem) {
+    .rail__label {
+      display: none;
+    }
+  }
+
+  .rail__slots {
+    display: flex;
+    gap: 0.5rem;
+    margin-inline-start: auto;
+  }
+
+  .slot {
+    position: relative;
+    inline-size: 2.5rem;
+    block-size: 2.5rem;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    overflow: hidden;
+    background: var(--ink-800);
+    display: grid;
+    place-items: center;
+    transition: border-color var(--dur) var(--ease);
+  }
+
+  .slot[data-filled="true"] {
+    border-color: var(--line-strong);
+  }
+
+  .slot img {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+    object-position: top center;
+    scale: 1.35;
+    translate: 0 8%;
+  }
+
+  .slot__empty {
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    color: var(--silver-dim);
+    opacity: 0.5;
+  }
+
+  .slot__year {
+    position: absolute;
+    inset-block-end: 0;
+    inset-inline: 0;
+    padding-block: 1px;
+    background: color-mix(in oklab, var(--ink-950) 82%, transparent);
+    font-family: var(--font-display);
+    font-size: 0.5rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-align: center;
+    color: var(--silver);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* ============================================================
+   RESULTS
+   ============================================================ */
+
+@layer components {
+  .results {
+    display: grid;
+    gap: clamp(1.5rem, 3.5vw, 2.5rem);
+  }
+
+  .scorecard {
+    display: grid;
+    gap: clamp(1.5rem, 4vw, 3rem);
+    align-items: center;
+    grid-template-columns: auto 1fr;
+    padding: clamp(1.25rem, 3.5vw, 2.25rem);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-lg);
+    background:
+      radial-gradient(120% 140% at 0% 0%, color-mix(in oklab, var(--silver) 8%, transparent), transparent 55%),
+      var(--surface);
+  }
+
+  @media (max-width: 46rem) {
+    .scorecard {
+      grid-template-columns: 1fr;
+      justify-items: center;
+      text-align: center;
+    }
+  }
+
+  .dial {
+    --pct: 0;
+    position: relative;
+    inline-size: clamp(9rem, 24vw, 11.5rem);
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background:
+      conic-gradient(
+        from -90deg in oklab,
+        var(--silver) calc(var(--pct) * 1%),
+        color-mix(in oklab, var(--silver) 11%, transparent) 0
+      );
+    transition: --pct 1200ms var(--ease);
+  }
+
+  .dial::before {
+    content: "";
+    position: absolute;
+    inset: 7px;
+    border-radius: 50%;
+    background: var(--ink-900);
+    border: 1px solid var(--line);
+  }
+
+  .dial__value {
+    position: relative;
+    display: flex;
+    align-items: baseline;
+    gap: 0.1rem;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    color: var(--paper);
+  }
+
+  .dial__value b {
+    font-size: clamp(2.75rem, 7vw, 3.75rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+
+  .dial__value span {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--silver-dim);
+  }
+
+  .scorecard__body {
+    display: grid;
+    gap: 1rem;
+    min-inline-size: 0;
+  }
+
+  .scorecard__tier {
+    font-size: clamp(2rem, 6vw, 3.25rem);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: -0.015em;
+    line-height: 0.92;
+    color: var(--paper);
+  }
+
+  .scorecard__note {
+    color: var(--text-muted);
+    font-size: 0.9375rem;
+    max-inline-size: 34ch;
+  }
+
+  .scorecard__badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .bars {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .bar {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.35rem 1rem;
+    align-items: baseline;
+  }
+
+  .bar__label {
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .bar__value {
+    font-family: var(--font-display);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--paper);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .bar__value span {
+    color: var(--silver-dim);
+    font-weight: 400;
+  }
+
+  .bar__track {
+    grid-column: 1 / -1;
+    block-size: 3px;
+    background: color-mix(in oklab, var(--silver) 11%, transparent);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .bar__fill {
+    display: block;
+    block-size: 100%;
+    inline-size: var(--w, 0%);
+    background: linear-gradient(to right in oklab, var(--silver-dim), var(--silver));
+    border-radius: inherit;
+    transition: inline-size 900ms var(--ease);
+  }
+
+  .bar__blurb {
+    grid-column: 1 / -1;
+    font-size: 0.75rem;
+    color: var(--text-faint);
+  }
+
+  /* --- roster review --- */
+
+  .review {
+    display: grid;
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  .review__row {
+    display: grid;
+    grid-template-columns: 3.25rem 1fr auto;
+    gap: clamp(0.75rem, 2vw, 1.25rem);
+    align-items: center;
+    padding: 0.875rem 1rem;
+    background: var(--surface);
+  }
+
+  .review__shot {
+    position: relative;
+    inline-size: 3.25rem;
+    block-size: 3.25rem;
+    border-radius: 2px;
+    overflow: hidden;
+    background: var(--ink-700);
+    display: grid;
+    place-items: center;
+  }
+
+  .review__shot img {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+    object-position: top center;
+    scale: 1.3;
+    translate: 0 6%;
+  }
+
+  .review__who {
+    display: grid;
+    gap: 0.2rem;
+    min-inline-size: 0;
+  }
+
+  .review__who b {
+    font-family: var(--font-display);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    color: var(--paper);
+    line-height: 1.15;
+  }
+
+  .review__who span {
+    font-size: 0.75rem;
+    color: var(--text-faint);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .review__verdict {
+    display: grid;
+    gap: 0.25rem;
+    justify-items: end;
+    text-align: end;
+  }
+
+  .review__verdict small {
+    font-size: 0.6875rem;
+    color: var(--text-faint);
+    max-inline-size: 22ch;
+  }
+
+  .review__verdict small b {
+    color: var(--silver);
+    font-weight: 600;
+  }
+
+  @media (max-width: 40rem) {
+    .review__row {
+      grid-template-columns: 2.75rem 1fr;
+    }
+
+    .review__shot {
+      inline-size: 2.75rem;
+      block-size: 2.75rem;
+    }
+
+    .review__verdict {
+      grid-column: 2;
+      justify-items: start;
+      text-align: start;
+    }
+  }
+
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.15rem 0.45rem;
+    border-radius: 2px;
+    font-family: var(--font-display);
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .tag--best {
+    background: var(--silver);
+    color: var(--ink-950);
+  }
+
+  .tag--mid {
+    border: 1px solid var(--line-strong);
+    color: var(--text-muted);
+  }
+
+  .tag--miss {
+    border: 1px solid color-mix(in oklab, var(--fiesta-pink) 50%, transparent);
+    color: var(--fiesta-pink);
+  }
+
+  /* --- coverage grid --- */
+
+  .coverage {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  .coverage__cell {
+    background: var(--surface);
+    padding: 0.875rem 1rem;
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  .coverage__cell[data-met="false"] {
+    color: var(--text-faint);
+  }
+
+  .coverage__mark {
+    font-family: var(--font-display);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fiesta-teal);
+  }
+
+  .coverage__cell[data-met="false"] .coverage__mark {
+    color: var(--fiesta-pink);
+  }
+
+  .coverage__cell b {
+    font-family: var(--font-display);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--paper);
+  }
+
+  .coverage__cell[data-met="false"] b {
+    color: var(--text-muted);
+  }
+
+  .coverage__cell span {
+    font-size: 0.75rem;
+    color: var(--text-faint);
+  }
+
+  .share-fallback {
+    margin: 0;
+    padding: 0.875rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    font-family: var(--font-ui);
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--text);
+    white-space: pre-wrap;
+    user-select: all;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.625rem;
+    justify-content: center;
+  }
+}
+
+/* ============================================================
+   SECTION HEADS
+   ============================================================ */
+
+@layer components {
+  .section {
+    display: grid;
+    gap: 0.875rem;
+  }
+
+  .section__head {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+  }
+
+  .section__head::after {
+    content: "";
+    flex: 1;
+    block-size: 1px;
+    background: var(--line);
+  }
+
+  .footer {
+    border-block-start: 1px solid var(--line);
+    padding-block: 1.5rem;
+    margin-block-start: 2rem;
+  }
+
+  .footer__inner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+    align-items: center;
+    font-size: 0.6875rem;
+    color: var(--text-faint);
+    line-height: 1.6;
+  }
+
+  .footer__mark {
+    inline-size: 1.125rem;
+    flex: none;
+    color: var(--silver);
+    opacity: 0.75;
+  }
+
+  .footer__wordmark {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.6875rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--silver);
+  }
+
+  .footer__spacer {
+    flex: 1;
+    min-inline-size: 1rem;
+  }
+
+  .footer__cry {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--fiesta-orange);
+    opacity: 0.9;
+  }
+}
+
+/* ============================================================
+   MOTION
+   ============================================================ */
+
+@layer components {
+  .stage {
+    animation: stage-in 460ms var(--ease) both;
+  }
+
+  @keyframes stage-in {
+    from {
+      opacity: 0;
+      translate: 0 14px;
+    }
+  }
+
+  .card {
+    animation: card-in 420ms var(--ease) both;
+    animation-delay: calc(var(--i, 0) * 70ms);
+  }
+
+  @keyframes card-in {
+    from {
+      opacity: 0;
+      translate: 0 18px;
+    }
+  }
+
+  .verdict {
+    animation: stage-in 320ms var(--ease) both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .card:where(:hover, :focus-visible) {
+    translate: none;
+  }
+}
+
+/* The score dial animates a custom property, which needs registering. */
+@property --pct {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+/* ============================================================
+   SMALL PORTRAITS — roster rail and results review
+   Boxed thumbnails rather than the card's full-bleed figure.
+   ============================================================ */
+
+@layer components {
+  .portrait--slot,
+  .portrait--review {
+    position: relative;
+    inset: auto;
+    z-index: auto;
+    block-size: auto;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    border-radius: 2px;
+    background: var(--ink-700);
+  }
+
+  .portrait--slot {
+    inline-size: 2.5rem;
+    block-size: 2.5rem;
+  }
+
+  .portrait--review {
+    inline-size: 3.25rem;
+    block-size: 3.25rem;
+  }
+
+  .portrait--slot .portrait__photo,
+  .portrait--review .portrait__photo {
+    inline-size: 100%;
+    block-size: 100%;
+    max-inline-size: none;
+    object-fit: cover;
+    object-position: top center;
+    filter: grayscale(1) contrast(1.05);
+    -webkit-mask: none;
+    mask: none;
+    animation: none;
+  }
+
+  .portrait--slot .portrait__figure,
+  .portrait--slot .portrait__sweep,
+  .portrait--slot .portrait__note,
+  .portrait--review .portrait__figure,
+  .portrait--review .portrait__sweep,
+  .portrait--review .portrait__note {
+    display: none;
+  }
+
+  .portrait--slot .portrait__crest,
+  .portrait--review .portrait__crest {
+    inline-size: 52%;
+    opacity: 0.32;
+    animation: none;
+  }
+
+  @media (max-width: 40rem) {
+    .portrait--review {
+      inline-size: 2.75rem;
+      block-size: 2.75rem;
+    }
+  }
+}
+
+@media (forced-colors: active) {
+  .card,
+  .verdict,
+  .review__row,
+  .coverage__cell {
+    border: 1px solid CanvasText;
+  }
+
+  .card[data-state="picked"] {
+    outline: 3px solid Highlight;
+  }
+
+  .bar__fill {
+    background: Highlight;
+  }
 }

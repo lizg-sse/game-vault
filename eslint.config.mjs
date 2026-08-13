@@ -12,7 +12,19 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Agent worktrees hold their own checkout of the same sources.
+    ".claude/**",
   ]),
+  {
+    rules: {
+      // `const { name: _name, ...rest } = p` is how we drop fields from an
+      // object; the discarded bindings are intentional.
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_" },
+      ],
+    },
+  },
 ]);
 
 export default eslintConfig;
