@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# cached upstream responses for scripts/build-players.mjs
+/scripts/.cache
