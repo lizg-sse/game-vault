@@ -1,7 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import { Intro } from "./Intro";
 import { PlayerCard } from "./PlayerCard";
 import { Results } from "./Results";
@@ -33,7 +40,7 @@ function save(id: string, value: Saved) {
   }
 }
 
-export function VaultGame({
+export function BestOfThree({
   initialPuzzle,
   puzzleNumber,
   vaultMeta,
@@ -41,7 +48,12 @@ export function VaultGame({
 }: {
   initialPuzzle: Puzzle;
   puzzleNumber: number;
-  vaultMeta: { seasons: number; playerSeasons: number; first?: string; last?: string };
+  vaultMeta: {
+    seasons: number;
+    playerSeasons: number;
+    first?: string;
+    last?: string;
+  };
   actions: {
     revealRound: (puzzleId: string, roundIndex: number) => Promise<Reveal>;
     gradeVault: (puzzleId: string, pickIds: string[]) => Promise<Grade>;
@@ -58,16 +70,19 @@ export function VaultGame({
   const [busy, startTransition] = useTransition();
   const stageRef = useRef<HTMLDivElement>(null);
 
-  const heading = puzzle.daily ? `The Vault #${puzzleNumber}` : "Practice Vault";
+  const heading = puzzle.daily
+    ? `The Vault #${puzzleNumber}`
+    : "Practice Vault";
   const round = puzzle.rounds[roundIndex];
   const currentPickId = pickIds[roundIndex];
-  const decided = Boolean(currentPickId) && round?.options.every((o) => reveals[o.id]);
+  const decided =
+    Boolean(currentPickId) && round?.options.every((o) => reveals[o.id]);
 
   const persist = useCallback(
     (ids: string[], done: boolean) => {
       if (puzzle.daily) save(puzzle.id, { picks: ids, done });
     },
-    [puzzle.daily, puzzle.id]
+    [puzzle.daily, puzzle.id],
   );
 
   /*
@@ -93,7 +108,9 @@ export function VaultGame({
       }
 
       const at = Math.min(saved.picks.length, puzzle.rounds.length - 1);
-      const revealed = saved.picks[at] ? await actions.revealRound(puzzle.id, at) : {};
+      const revealed = saved.picks[at]
+        ? await actions.revealRound(puzzle.id, at)
+        : {};
       if (cancelled) return;
       setPickIds(saved.picks);
       setReveals(revealed);
@@ -124,7 +141,9 @@ export function VaultGame({
       persist(pickIds, true);
       setPhase("done");
       window.scrollTo({ top: 0, behavior: "smooth" });
-      startTransition(async () => setGrade(await actions.gradeVault(puzzle.id, pickIds)));
+      startTransition(async () =>
+        setGrade(await actions.gradeVault(puzzle.id, pickIds)),
+      );
       return;
     }
     setRoundIndex((i) => i + 1);
@@ -151,12 +170,19 @@ export function VaultGame({
 
   /** Slot -> identity, for the roster rail. */
   const rosterIdentities = useMemo(
-    () => puzzle.rounds.map((_, i) => (pickIds[i] ? reveals[pickIds[i]] ?? null : null)),
-    [puzzle.rounds, pickIds, reveals]
+    () =>
+      puzzle.rounds.map((_, i) =>
+        pickIds[i] ? (reveals[pickIds[i]] ?? null) : null,
+      ),
+    [puzzle.rounds, pickIds, reveals],
   );
 
-  const chosen: Identity | null = currentPickId ? reveals[currentPickId] ?? null : null;
-  const passed = round?.options.filter((o) => o.id !== currentPickId).map((o) => reveals[o.id]?.name);
+  const chosen: Identity | null = currentPickId
+    ? (reveals[currentPickId] ?? null)
+    : null;
+  const passed = round?.options
+    .filter((o) => o.id !== currentPickId)
+    .map((o) => reveals[o.id]?.name);
 
   return (
     <div className="app">
@@ -177,7 +203,13 @@ export function VaultGame({
                   <span
                     key={r.season.year}
                     className="pip"
-                    data-state={i < roundIndex ? "done" : i === roundIndex ? "active" : "open"}
+                    data-state={
+                      i < roundIndex
+                        ? "done"
+                        : i === roundIndex
+                          ? "active"
+                          : "open"
+                    }
                   />
                 ))}
               </div>
@@ -189,9 +221,17 @@ export function VaultGame({
 
       <main className="shell">
         {phase === "intro" && (
-          <Intro dateLabel={puzzle.dateLabel} number={puzzleNumber} vaultMeta={vaultMeta}>
+          <Intro
+            dateLabel={puzzle.dateLabel}
+            number={puzzleNumber}
+            vaultMeta={vaultMeta}
+          >
             <div className="actions">
-              <button type="button" className="btn btn--primary" onClick={start}>
+              <button
+                type="button"
+                className="btn btn--primary"
+                onClick={start}
+              >
                 Open the vault
               </button>
               {/* The vault's other games — see /higher-lower and /six-clues. */}
@@ -206,8 +246,16 @@ export function VaultGame({
         )}
 
         {phase === "round" && round && (
-          <div className="stage" key={`${puzzle.id}-${roundIndex}`} ref={stageRef}>
-            <SeasonPlate round={round} index={roundIndex} total={puzzle.rounds.length} />
+          <div
+            className="stage"
+            key={`${puzzle.id}-${roundIndex}`}
+            ref={stageRef}
+          >
+            <SeasonPlate
+              round={round}
+              index={roundIndex}
+              total={puzzle.rounds.length}
+            />
 
             <div className="board" aria-busy={busy}>
               {round.options.map((player, i) => (
@@ -216,7 +264,13 @@ export function VaultGame({
                   player={player}
                   identity={reveals[player.id] ?? null}
                   index={i}
-                  state={!currentPickId ? "open" : player.id === currentPickId ? "picked" : "passed"}
+                  state={
+                    !currentPickId
+                      ? "open"
+                      : player.id === currentPickId
+                        ? "picked"
+                        : "passed"
+                  }
                   revealed={Boolean(decided)}
                   onPick={() => choose(player)}
                 />
@@ -229,10 +283,18 @@ export function VaultGame({
                   <b>
                     Signed: {chosen.name}, <em>{round.season.label}</em>
                   </b>
-                  <span>{passed?.filter(Boolean).join(" and ")} stay in the vault.</span>
+                  <span>
+                    {passed?.filter(Boolean).join(" and ")} stay in the vault.
+                  </span>
                 </div>
-                <button type="button" className="btn btn--primary" onClick={advance}>
-                  {roundIndex === puzzle.rounds.length - 1 ? "Grade my team" : "Next season"}
+                <button
+                  type="button"
+                  className="btn btn--primary"
+                  onClick={advance}
+                >
+                  {roundIndex === puzzle.rounds.length - 1
+                    ? "Grade my team"
+                    : "Next season"}
                 </button>
               </div>
             )}
@@ -241,7 +303,11 @@ export function VaultGame({
 
         {phase === "done" &&
           (grade ? (
-            <Results grade={grade} heading={heading} onPractice={startPractice} />
+            <Results
+              grade={grade}
+              heading={heading}
+              onPractice={startPractice}
+            />
           ) : (
             <p className="eyebrow" style={{ textAlign: "center" }}>
               Grading your roster…

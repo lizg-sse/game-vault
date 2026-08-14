@@ -13,15 +13,15 @@ export type Category = {
 };
 
 export const CATEGORIES: Category[] = [
-  { key: "pts", prompt: "scored more points", noun: "points", floor: 400 },
-  { key: "trb", prompt: "grabbed more rebounds", noun: "rebounds", floor: 250 },
-  { key: "ast", prompt: "dished more assists", noun: "assists", floor: 150 },
-  { key: "stl", prompt: "recorded more steals", noun: "steals", floor: 75 },
-  { key: "blk", prompt: "blocked more shots", noun: "blocks", floor: 50 },
-  { key: "fg3", prompt: "made more three-pointers", noun: "threes made", floor: 50 },
-  { key: "ft", prompt: "made more free throws", noun: "free throws", floor: 150 },
-  { key: "games", prompt: "played more games", noun: "games", floor: 100 },
-  { key: "mp", prompt: "logged more minutes", noun: "minutes", floor: 2000 },
+  { key: "pts", prompt: "scored more", noun: "points", floor: 400 },
+  { key: "trb", prompt: "grabbed more", noun: "rebounds", floor: 250 },
+  { key: "ast", prompt: "dished more", noun: "assists", floor: 150 },
+  { key: "stl", prompt: "recorded more", noun: "steals", floor: 75 },
+  { key: "blk", prompt: "swatted more", noun: "blocks", floor: 50 },
+  { key: "fg3", prompt: "made more", noun: "threes", floor: 50 },
+  { key: "ft", prompt: "made more", noun: "free throws", floor: 150 },
+  { key: "games", prompt: "played more", noun: "games", floor: 100 },
+  { key: "mp", prompt: "logged more", noun: "minutes", floor: 2000 },
 ];
 
 export type Round = {

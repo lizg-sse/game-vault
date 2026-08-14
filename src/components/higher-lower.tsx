@@ -1,25 +1,25 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { CATEGORIES, formatStat, nextRound, type Player, type Round } from "@/lib/game";
+import { PLAYERS } from "@/lib/players";
+import { SpurMark } from "./SpurMark";
+import styles from "./higher-lower.module.css";
 
 const BEST_KEY = "spurs-higher-lower-best";
 const REVEAL_MS = 1900;
 
 type Phase = "start" | "playing" | "reveal" | "over";
 
-/**
- * Best streak lives in localStorage, read through useSyncExternalStore so the
- * server renders 0 and the client swaps in the stored value without an effect.
- */
 let bestListeners: (() => void)[] = [];
 
 const bestStore = {
-  subscribe(cb: () => void) {
-    bestListeners.push(cb);
+  subscribe(listener: () => void) {
+    bestListeners.push(listener);
     return () => {
-      bestListeners = bestListeners.filter((l) => l !== cb);
+      bestListeners = bestListeners.filter((item) => item !== listener);
     };
   },
   get() {
@@ -31,7 +31,7 @@ const bestStore = {
   },
   set(value: number) {
     window.localStorage.setItem(BEST_KEY, String(value));
-    bestListeners.forEach((l) => l());
+    bestListeners.forEach((listener) => listener());
   },
 };
 
@@ -39,25 +39,23 @@ function useBest() {
   return useSyncExternalStore(bestStore.subscribe, bestStore.get, bestStore.server);
 }
 
-/**
- * Eases a number up from 0. Cards are remounted each round, so state starts at
- * 0 and no reset is needed when `active` is false.
- */
-function useCountUp(target: number, active: boolean, duration = 750) {
+function useCountUp(target: number, active: boolean, duration = 800) {
   const [value, setValue] = useState(0);
 
   useEffect(() => {
     if (!active) return;
+
     let frame = 0;
-    const start = performance.now();
+    const startedAt = performance.now();
     const tick = (now: number) => {
-      const t = Math.min(1, (now - start) / duration);
-      setValue(Math.round(target * (1 - Math.pow(1 - t, 3))));
-      if (t < 1) frame = requestAnimationFrame(tick);
+      const progress = Math.min(1, (now - startedAt) / duration);
+      setValue(Math.round(target * (1 - Math.pow(1 - progress, 3))));
+      if (progress < 1) frame = requestAnimationFrame(tick);
     };
+
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [target, active, duration]);
+  }, [active, duration, target]);
 
   return value;
 }
@@ -71,13 +69,19 @@ export default function HigherLower() {
   const best = useBest();
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
+  useEffect(
+    () => () => {
+      if (timer.current) clearTimeout(timer.current);
+    },
+    [],
+  );
 
   const start = useCallback(() => {
+    if (timer.current) clearTimeout(timer.current);
     setStreak(0);
     setPicked(null);
     setRound(nextRound());
-    setRoundId((n) => n + 1);
+    setRoundId((value) => value + 1);
     setPhase("playing");
   }, []);
 
@@ -93,76 +97,185 @@ export default function HigherLower() {
       setPhase("reveal");
 
       timer.current = setTimeout(() => {
-        if (correct) {
-          const next = streak + 1;
-          setStreak(next);
-          if (next > best) bestStore.set(next);
-          setPicked(null);
-          setRound(nextRound([round.left.id, round.right.id]));
-          setRoundId((n) => n + 1);
-          setPhase("playing");
-        } else {
+        if (!correct) {
           setPhase("over");
+          return;
         }
+
+        const nextStreak = streak + 1;
+        setStreak(nextStreak);
+        if (nextStreak > best) bestStore.set(nextStreak);
+        setPicked(null);
+        setRound(nextRound([round.left.id, round.right.id]));
+        setRoundId((value) => value + 1);
+        setPhase("playing");
       }, REVEAL_MS);
     },
-    [phase, round, streak, best],
+    [best, phase, round, streak],
   );
 
-  if (phase === "start" || !round) {
-    return <StartScreen best={best} onStart={start} />;
-  }
-
-  const key = round.category.key;
-  const winnerId =
-    round.left.stats[key] > round.right.stats[key] ? round.left.id : round.right.id;
-  const revealed = phase === "reveal" || phase === "over";
-  const gotItRight = revealed && picked === winnerId;
-
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-4 px-4 py-4 sm:gap-8 sm:py-10">
-      <Scoreboard streak={streak} best={best} />
+    <div className={styles.app}>
+      <GameHeader />
 
-      <p className="text-center text-base font-semibold tracking-tight text-zinc-100 sm:text-2xl">
-        Who{" "}
-        <span className="text-[var(--silver)]">{round.category.prompt}</span>{" "}
-        for the Spurs?
-      </p>
+      <main className={styles.main}>
+        {phase === "start" || !round ? (
+          <StartScreen best={best} onStart={start} />
+        ) : (
+          <Matchup
+            key={roundId}
+            round={round}
+            phase={phase}
+            picked={picked}
+            streak={streak}
+            best={best}
+            onChoose={choose}
+            onRestart={start}
+          />
+        )}
+      </main>
 
-      <div className="grid flex-1 grid-cols-1 items-stretch gap-3 sm:grid-cols-[1fr_auto_1fr] sm:gap-4">
-        <PlayerCard
-          key={`${roundId}-left`}
-          player={round.left}
-          round={round}
-          revealed={revealed}
-          picked={picked}
-          winnerId={winnerId}
-          onChoose={choose}
+      <GameFooter />
+    </div>
+  );
+}
+
+function GameHeader() {
+  return (
+    <header className={styles.masthead}>
+      <div className={styles.mastheadInner}>
+        <Link href="/" aria-label="Back to The Vault" className={styles.back}>
+          ←
+        </Link>
+        <SpurMark className={styles.headerMark} />
+        <p className={styles.headerTitle}>
+          <span>Higher / Lower</span>
+          <small>The Vault · SAS</small>
+        </p>
+        <span className={styles.playerCount}>{PLAYERS.length} players</span>
+      </div>
+    </header>
+  );
+}
+
+function StartScreen({ best, onStart }: { best: number; onStart: () => void }) {
+  return (
+    <section className={styles.start} data-screen-label="Start">
+      <div className={styles.startPlayers} aria-hidden="true">
+        <Image
+          src="/players/duncati01.webp"
+          alt=""
+          width={520}
+          height={380}
+          priority
+          className={styles.startLeft}
         />
-        <div className="flex items-center justify-center">
-          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-bold tracking-[0.2em] text-zinc-400">
-            VS
-          </span>
-        </div>
-        <PlayerCard
-          key={`${roundId}-right`}
-          player={round.right}
-          round={round}
-          revealed={revealed}
-          picked={picked}
-          winnerId={winnerId}
-          onChoose={choose}
+        <Image
+          src="/players/robinda01.webp"
+          alt=""
+          width={520}
+          height={380}
+          priority
+          className={styles.startRight}
         />
+        <span className={styles.startVs}>
+          <b>VS</b>
+        </span>
       </div>
 
-      <p aria-live="polite" className="min-h-6 text-center text-sm font-medium">
+      <div className={styles.startCopy}>
+        <h1>
+          Higher
+          <br />/ Lower
+        </h1>
+        <p>
+          Two Spurs, one stat. Pick whoever put up the bigger number in silver and black —{" "}
+          <strong>and keep the streak alive.</strong>
+        </p>
+      </div>
+
+      <ul className={styles.categories}>
+        {CATEGORIES.map((category) => (
+          <li key={category.key}>{category.noun}</li>
+        ))}
+      </ul>
+
+      <div className={styles.startActions}>
+        <button type="button" onClick={onStart} className={styles.primaryButton}>
+          Tip it off
+        </button>
+        {best > 0 && (
+          <p>
+            Your best streak: <span>{best}</span>
+          </p>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function Matchup({
+  round,
+  phase,
+  picked,
+  streak,
+  best,
+  onChoose,
+  onRestart,
+}: {
+  round: Round;
+  phase: Exclude<Phase, "start">;
+  picked: string | null;
+  streak: number;
+  best: number;
+  onChoose: (player: Player) => void;
+  onRestart: () => void;
+}) {
+  const key = round.category.key;
+  const winner = round.left.stats[key] > round.right.stats[key] ? round.left : round.right;
+  const loser = winner.id === round.left.id ? round.right : round.left;
+  const revealed = phase === "reveal" || phase === "over";
+  const correct = revealed && picked === winner.id;
+
+  return (
+    <section className={styles.matchup} data-screen-label="Matchup">
+      <div className={styles.scoreboard}>
+        <Score label="Streak" value={streak} active />
+        <Score label="Best" value={best} />
+      </div>
+
+      <header className={styles.prompt}>
+        <p>
+          <span /> Who {round.category.prompt} <span />
+        </p>
+        <h1>{round.category.noun}</h1>
+        <small>as a Spur · career total</small>
+      </header>
+
+      <div className={styles.cards}>
+        {[round.left, round.right].map((player, index) => (
+          <MatchupCard
+            key={player.id}
+            player={player}
+            round={round}
+            index={index}
+            picked={picked}
+            winnerId={winner.id}
+            revealed={revealed}
+            onChoose={onChoose}
+          />
+        ))}
+        <span className={styles.middleVs} aria-hidden="true">
+          <b>VS</b>
+        </span>
+      </div>
+
+      <p className={styles.verdict} aria-live="polite">
         {revealed &&
-          (gotItRight ? (
-            <span className="text-emerald-400">Correct — streak {streak + 1}</span>
+          (correct ? (
+            <span>Correct — streak {streak + 1}</span>
           ) : (
-            <span className="text-rose-400">
-              Wrong — it was {winnerId === round.left.id ? round.left.name : round.right.name}
-            </span>
+            <span className={styles.wrong}>Wrong — it was {winner.name}</span>
           ))}
       </p>
 
@@ -171,146 +284,92 @@ export default function HigherLower() {
           streak={streak}
           best={best}
           round={round}
-          winnerId={winnerId}
-          onRestart={start}
+          winner={winner}
+          loser={loser}
+          onRestart={onRestart}
         />
       )}
-    </div>
+    </section>
   );
 }
 
-function Scoreboard({ streak, best }: { streak: number; best: number }) {
+function Score({ label, value, active = false }: { label: string; value: number; active?: boolean }) {
   return (
-    <div className="flex items-center justify-center gap-3 sm:gap-4">
-      <Stat label="Streak" value={streak} highlight />
-      <Stat label="Best" value={best} />
+    <div className={active ? styles.scoreActive : styles.score}>
+      <span>{label}</span>
+      <strong>{value}</strong>
     </div>
   );
 }
 
-function Stat({ label, value, highlight }: { label: string; value: number; highlight?: boolean }) {
-  return (
-    <div
-      className={`min-w-24 rounded-xl border px-4 py-2 text-center ${
-        highlight
-          ? "border-[var(--silver)]/40 bg-[var(--silver)]/10"
-          : "border-white/10 bg-white/5"
-      }`}
-    >
-      <div className="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-zinc-400">
-        {label}
-      </div>
-      <div className="text-2xl font-bold tabular-nums text-zinc-50">{value}</div>
-    </div>
-  );
-}
-
-function PlayerCard({
+function MatchupCard({
   player,
   round,
-  revealed,
+  index,
   picked,
   winnerId,
+  revealed,
   onChoose,
 }: {
   player: Player;
   round: Round;
-  revealed: boolean;
+  index: number;
   picked: string | null;
   winnerId: string;
-  onChoose: (p: Player) => void;
+  revealed: boolean;
+  onChoose: (player: Player) => void;
 }) {
-  const value = player.stats[round.category.key];
-  const count = useCountUp(value, revealed);
-  const isWinner = player.id === winnerId;
-  const isPicked = player.id === picked;
-
-  const border = !revealed
-    ? "border-white/10 hover:border-[var(--silver)]/60 hover:bg-white/[0.07]"
-    : isWinner
-      ? "border-emerald-400/70 bg-emerald-400/10"
-      : isPicked
-        ? "border-rose-400/70 bg-rose-400/10"
-        : "border-white/10 opacity-60";
+  const winner = player.id === winnerId;
+  const pickedCard = player.id === picked;
+  const count = useCountUp(player.stats[round.category.key], revealed);
+  const state = !revealed ? "open" : winner ? "winner" : pickedCard ? "picked" : "passed";
 
   return (
     <button
       type="button"
       onClick={() => onChoose(player)}
       disabled={revealed}
-      aria-label={`Pick ${player.name}`}
-      className={`group flex flex-col items-center gap-2 rounded-2xl border bg-white/[0.03] p-3 transition-all duration-200 disabled:cursor-default sm:gap-3 sm:p-6 ${border}`}
+      className={styles.card}
+      data-state={state}
+      style={{ "--card-delay": `${index * 80}ms` } as React.CSSProperties}
     >
-      <div className="relative aspect-[4/3] w-full max-w-32 overflow-hidden rounded-xl bg-gradient-to-b from-zinc-700/40 to-zinc-900/60 sm:max-w-52">
+      {revealed && winner && (
+        <>
+          <span className={styles.winSweep} aria-hidden="true" />
+          <span className={styles.higherBadge}>Higher</span>
+        </>
+      )}
+      <span className={styles.cardWatermark} aria-hidden="true" />
+
+      <span className={styles.cardPortrait}>
+        <span aria-hidden="true" />
         <Image
           src={player.img}
           alt={player.name}
           width={520}
           height={380}
           priority
-          className="h-full w-full object-cover object-top"
         />
-      </div>
+      </span>
 
-      <div className="text-center">
-        <div className="text-base font-bold tracking-tight text-zinc-50 sm:text-lg">
-          {player.name}
-        </div>
-        <div className="text-xs text-zinc-400">{player.years}</div>
-      </div>
+      <span className={styles.playerName}>
+        <strong>{player.name}</strong>
+        <small>{player.years}</small>
+      </span>
 
-      <div className="flex h-11 flex-col justify-center sm:h-14">
+      <span className={styles.cardValue}>
         {revealed ? (
           <>
-            <div className="text-2xl font-bold tabular-nums text-zinc-50 sm:text-4xl">
-              {formatStat(count)}
-            </div>
-            <div className="text-[0.65rem] font-semibold uppercase tracking-[0.15em] text-zinc-400">
-              {round.category.noun}
-            </div>
+            <strong>{formatStat(count)}</strong>
+            <small>{round.category.noun}</small>
           </>
         ) : (
-          <span className="text-2xl font-bold text-zinc-600 sm:text-4xl">?</span>
+          <span className={styles.question} aria-hidden="true">
+            <b>?</b>
+          </span>
         )}
-      </div>
+      </span>
     </button>
-  );
-}
-
-function StartScreen({ best, onStart }: { best: number; onStart: () => void }) {
-  return (
-    <div className="mx-auto flex w-full max-w-xl flex-1 flex-col items-center justify-center gap-6 px-4 py-16 text-center">
-      <div>
-        <h1 className="text-4xl font-bold tracking-tight text-zinc-50 sm:text-5xl">
-          Higher <span className="text-[var(--silver)]">/</span> Lower
-        </h1>
-        <p className="mt-3 text-zinc-400">
-          Two Spurs, one stat. Pick whoever put up the bigger number in silver and black — and
-          keep the streak alive.
-        </p>
-      </div>
-
-      <ul className="flex flex-wrap justify-center gap-2">
-        {CATEGORIES.map((c) => (
-          <li
-            key={c.key}
-            className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-400"
-          >
-            {c.noun}
-          </li>
-        ))}
-      </ul>
-
-      <button
-        type="button"
-        onClick={onStart}
-        className="rounded-full bg-[var(--silver)] px-8 py-3 text-base font-bold text-black transition hover:bg-white"
-      >
-        Play
-      </button>
-
-      {best > 0 && <p className="text-sm text-zinc-500">Your best streak: {best}</p>}
-    </div>
   );
 }
 
@@ -318,56 +377,66 @@ function GameOver({
   streak,
   best,
   round,
-  winnerId,
+  winner,
+  loser,
   onRestart,
 }: {
   streak: number;
   best: number;
   round: Round;
-  winnerId: string;
+  winner: Player;
+  loser: Player;
   onRestart: () => void;
 }) {
   const key = round.category.key;
-  const winner = winnerId === round.left.id ? round.left : round.right;
-  const loser = winnerId === round.left.id ? round.right : round.left;
 
   return (
-    <div className="fixed inset-0 z-10 flex items-center justify-center bg-black/75 p-4">
-      <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-zinc-950 p-6 text-center sm:p-8">
-        <h2 className="text-2xl font-bold text-zinc-50">Streak over</h2>
-        <p className="mt-2 text-zinc-400">
-          You got <span className="font-bold text-zinc-100">{streak}</span> in a row.
+    <div className={styles.modalBackdrop}>
+      <div className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="streak-over-title">
+        <p className={styles.modalEyebrow}>Buzzer</p>
+        <h2 id="streak-over-title">Streak over</h2>
+        <p className={styles.modalLede}>
+          You got <strong>{streak}</strong> in a row.
         </p>
 
-        <dl className="mt-5 space-y-1 rounded-xl border border-white/10 bg-white/[0.03] p-4 text-left">
-          <div className="flex items-baseline justify-between gap-3">
-            <dt className="text-sm font-semibold text-emerald-400">{winner.name}</dt>
-            <dd className="text-sm font-bold tabular-nums text-emerald-400">
-              {formatStat(winner.stats[key])}
-            </dd>
+        <dl className={styles.resultTable}>
+          <div>
+            <dt>{winner.name}</dt>
+            <dd>{formatStat(winner.stats[key])}</dd>
           </div>
-          <div className="flex items-baseline justify-between gap-3">
-            <dt className="text-sm text-zinc-400">{loser.name}</dt>
-            <dd className="text-sm tabular-nums text-zinc-400">
-              {formatStat(loser.stats[key])}
-            </dd>
+          <div>
+            <dt>{loser.name}</dt>
+            <dd>{formatStat(loser.stats[key])}</dd>
           </div>
-          <p className="pt-1 text-[0.65rem] font-semibold uppercase tracking-[0.15em] text-zinc-600">
-            {round.category.noun} as a Spur
-          </p>
+          <p>{round.category.noun} as a Spur</p>
         </dl>
 
-        <p className="mt-4 text-sm text-zinc-500">
+        <p className={styles.bestNote}>
           {streak >= best && streak > 0 ? "That's a new personal best." : `Best: ${best}`}
         </p>
-        <button
-          type="button"
-          onClick={onRestart}
-          className="mt-5 w-full rounded-full bg-[var(--silver)] px-6 py-3 font-bold text-black transition hover:bg-white"
-        >
-          Play again
-        </button>
+
+        <div className={styles.modalActions}>
+          <button type="button" onClick={onRestart} className={styles.primaryButton}>
+            Run it back
+          </button>
+          <Link href="/" className={styles.secondaryButton}>
+            Back to the vault
+          </Link>
+        </div>
       </div>
     </div>
+  );
+}
+
+function GameFooter() {
+  return (
+    <footer className={styles.footer}>
+      <div className={styles.footerInner}>
+        <SpurMark className={styles.footerMark} />
+        <strong>San Antonio Spurs</strong>
+        <span />
+        <p>Regular-season totals with the Spurs (NBA era) · Stats via Basketball-Reference</p>
+      </div>
+    </footer>
   );
 }
