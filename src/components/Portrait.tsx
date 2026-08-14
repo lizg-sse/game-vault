@@ -9,8 +9,7 @@ import { SpurMark } from "./SpurMark";
  * the artwork carries no information about who is behind it. The identity is
  * not in the page at all until the server hands it over.
  *
- * On reveal the figure dissolves and a light sweeps across the plate as the
- * archive photo comes up underneath.
+ * On reveal the figure dissolves as the archive photo comes up underneath.
  */
 export function Portrait({
   src,
@@ -54,7 +53,6 @@ export function Portrait({
       {/* The blackout figure. Stays mounted through the reveal so it can
           dissolve rather than pop. */}
       <span className="portrait__figure" aria-hidden="true" />
-      <span className="portrait__sweep" aria-hidden="true" />
     </span>
   );
 }
