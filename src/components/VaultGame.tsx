@@ -162,9 +162,21 @@ export function VaultGame({
     <div className="app">
       <header className="masthead">
         <div className="shell masthead__inner">
+          <Link
+            href="/"
+            aria-label="Back to The Vault"
+            className="-ml-2 grid h-8 w-8 place-items-center rounded-[2px] text-faint no-underline transition-colors hover:text-paper"
+          >
+            ←
+          </Link>
           <SpurMark className="masthead__mark" title="San Antonio Spurs" />
-          <p className="masthead__title">
-            The Vault <span>SAS</span>
+          <p className="flex flex-col leading-[1.1]">
+            <span className="font-display text-base font-bold tracking-[0.19em] text-paper uppercase">
+              Best of 3
+            </span>
+            <span className="font-display text-[0.5625rem] font-normal tracking-[0.3em] text-faint uppercase">
+              The Vault · SAS
+            </span>
           </p>
           <div className="masthead__meta">
             {phase === "round" && (
@@ -194,13 +206,7 @@ export function VaultGame({
               <button type="button" className="btn btn--primary" onClick={start}>
                 Open the vault
               </button>
-              {/* The vault's other games — see /higher-lower and /six-clues. */}
-              <Link href="/higher-lower" className="btn btn--ghost">
-                Higher / Lower →
-              </Link>
-              <Link href="/six-clues" className="btn btn--ghost">
-                Six Clues →
-              </Link>
+              {/* The other games are one level up, on the hub. */}
             </div>
           </Intro>
         )}

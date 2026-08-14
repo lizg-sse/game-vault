@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useSyncExternalStore } from "react";
+import { useEffect, useRef } from "react";
+import { useReducedMotion } from "@/lib/useReducedMotion";
 
 /**
  * The fire under a streak.
@@ -335,24 +336,10 @@ class Fire {
   }
 }
 
-const REDUCED = "(prefers-reduced-motion: reduce)";
-
-function usePrefersReducedMotion() {
-  return useSyncExternalStore(
-    (cb) => {
-      const mq = window.matchMedia(REDUCED);
-      mq.addEventListener("change", cb);
-      return () => mq.removeEventListener("change", cb);
-    },
-    () => window.matchMedia(REDUCED).matches,
-    () => false,
-  );
-}
-
 export function StreakFire({ intensity, surge }: { intensity: number; surge: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fireRef = useRef<Fire | null>(null);
-  const still = usePrefersReducedMotion();
+  const still = useReducedMotion();
 
   // Engine lifetime. Declared first so it exists before the prop effects below.
   useEffect(() => {

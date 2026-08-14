@@ -1979,3 +1979,541 @@
     }
   }
 }
+
+/* ============================================================
+   HUB
+   The landing page: the archive's front door. Each game card
+   carries a looping preview of what the game actually looks
+   like — built from the same portraits and photos the games
+   use, so the card is a window rather than an icon.
+   ============================================================ */
+
+@layer components {
+  .hub {
+    justify-content: flex-start;
+    padding-block: 0;
+  }
+
+  .hub-rise {
+    animation: hub-rise 700ms var(--ease) both;
+    animation-delay: var(--d, 0ms);
+  }
+
+  @keyframes hub-rise {
+    from {
+      opacity: 0;
+      translate: 0 22px;
+    }
+  }
+
+  /* --- hero --- */
+
+  .hub-hero {
+    position: relative;
+    display: grid;
+    gap: clamp(1.25rem, 3.5vh, 2rem);
+    justify-items: center;
+    text-align: center;
+    padding-block: clamp(3rem, 9vh, 5.5rem) clamp(2rem, 5vh, 3.5rem);
+  }
+
+  .hub-hero__crest {
+    inline-size: clamp(3.25rem, 10vw, 4.5rem);
+    color: var(--silver);
+    filter: drop-shadow(0 0 40px color-mix(in oklab, var(--silver) 28%, transparent));
+    animation: hub-rise 700ms var(--ease) both;
+  }
+
+  .hub-hero__title {
+    font-size: clamp(4rem, 19vw, 9.5rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 0.84;
+    text-transform: uppercase;
+    background: linear-gradient(175deg in oklab, var(--paper) 8%, var(--silver) 52%, var(--silver-dim) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* --- ticker --- */
+
+  .hub-ticker {
+    border-block: 1px solid var(--line);
+    overflow: hidden;
+    background: color-mix(in oklab, var(--surface) 60%, transparent);
+  }
+
+  .hub-ticker__track {
+    display: flex;
+    inline-size: max-content;
+    animation: hub-ticker 46s linear infinite;
+  }
+
+  @keyframes hub-ticker {
+    to {
+      translate: -50% 0;
+    }
+  }
+
+  .hub-ticker__run {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 0.55rem 0.75rem;
+    white-space: nowrap;
+    font-family: var(--font-display);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+
+  .hub-ticker__run > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .hub-ticker__dot {
+    color: var(--silver);
+  }
+
+  /* --- slate --- */
+
+  .hub-slate {
+    display: grid;
+    gap: clamp(0.875rem, 2vw, 1.25rem);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  }
+
+  .hub-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    overflow: hidden;
+    isolation: isolate;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: linear-gradient(180deg in oklab, var(--ink-800), var(--ink-950) 80%);
+    transition: border-color var(--dur) var(--ease), translate var(--dur) var(--ease),
+      box-shadow var(--dur) var(--ease);
+  }
+
+  .hub-card:where(:hover, :focus-visible) {
+    border-color: var(--line-hot);
+    translate: 0 -4px;
+    box-shadow: 0 22px 50px -28px rgb(0 0 0 / 0.95);
+  }
+
+  .hub-card__body {
+    display: grid;
+    gap: 0.45rem;
+    padding: 1.125rem 1.25rem 1.25rem;
+  }
+
+  .hub-card__title {
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 5vw, 2.125rem);
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    line-height: 1;
+    text-transform: uppercase;
+    color: var(--paper);
+  }
+
+  .hub-card__cta {
+    margin-block-start: 0.35rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--silver);
+  }
+
+  .hub-card__cta > span {
+    inline-size: 0.3rem;
+    block-size: 0.3rem;
+    rotate: 45deg;
+    background: var(--silver);
+    transition: translate var(--dur) var(--ease);
+  }
+
+  .hub-card:where(:hover, :focus-visible) .hub-card__cta > span {
+    translate: 3px 0;
+  }
+
+  /* --- the preview frame every card shares --- */
+
+  .hub-shot {
+    position: relative;
+    display: block;
+    aspect-ratio: 16 / 9.5;
+    overflow: hidden;
+    border-block-end: 1px solid var(--line);
+  }
+
+  .hub-shot__floor {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      80% 90% at 50% 100%,
+      color-mix(in oklab, var(--silver) 8%, transparent),
+      transparent 62%
+    );
+  }
+
+  .hub-shot__fade {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: 0;
+    block-size: 42%;
+    background: linear-gradient(to top, #0b0d0f 8%, transparent);
+  }
+
+  /* --- Best of 3: the blackout lifts, the signed card rises --- */
+
+  .hub-b3 {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5%;
+    padding-inline: 8%;
+    opacity: 0;
+    animation: hub-b3-group 12s var(--ease) infinite;
+  }
+
+  @keyframes hub-b3-group {
+    0% {
+      opacity: 0;
+      translate: 55% 0;
+    }
+    9%,
+    44% {
+      opacity: 1;
+      translate: 0 0;
+    }
+    52%,
+    100% {
+      opacity: 0;
+      translate: -55% 0;
+    }
+  }
+
+  .hub-b3__tile {
+    position: relative;
+    inline-size: 24%;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    border-radius: 3px;
+    border: 1px solid var(--line-strong);
+    background: #0c0d0f;
+    animation: hub-b3-dip 12s ease infinite;
+  }
+
+  .hub-b3__tile.is-pick {
+    border-color: var(--line-hot);
+    box-shadow: 0 0 24px -6px color-mix(in oklab, var(--silver) 25%, transparent);
+    animation-name: hub-b3-rise;
+  }
+
+  @keyframes hub-b3-rise {
+    0%,
+    15% {
+      translate: 0 2px;
+    }
+    26%,
+    100% {
+      translate: 0 -7px;
+    }
+  }
+
+  @keyframes hub-b3-dip {
+    0%,
+    15% {
+      translate: 0 0;
+    }
+    26%,
+    100% {
+      translate: 0 6px;
+    }
+  }
+
+  .hub-b3__photo {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+    animation: hub-b3-reveal 12s ease infinite;
+  }
+
+  @keyframes hub-b3-reveal {
+    0%,
+    21% {
+      filter: grayscale(1) brightness(0.06) contrast(1.2);
+    }
+    33%,
+    100% {
+      filter: grayscale(1) brightness(0.88) contrast(1.12);
+    }
+  }
+
+  .hub-b3__letter {
+    position: absolute;
+    inset-block-start: 4px;
+    inset-inline-start: 4px;
+    display: grid;
+    place-items: center;
+    inline-size: 1rem;
+    block-size: 1rem;
+    border-radius: 2px;
+    background: color-mix(in oklab, var(--ink-950) 80%, transparent);
+    border: 1px solid color-mix(in oklab, var(--silver) 40%, transparent);
+    font-family: var(--font-display);
+    font-size: 0.5625rem;
+    font-weight: 600;
+    color: var(--silver);
+  }
+
+  .hub-b3__tile.is-pick .hub-b3__letter {
+    background: var(--silver);
+    border-color: var(--silver);
+    color: var(--ink-950);
+  }
+
+  /* --- Six Clues: the photo sharpens as clues land --- */
+
+  .hub-sx__frame {
+    position: absolute;
+    inset-inline-start: 14%;
+    inset-block-start: 50%;
+    translate: 0 -50%;
+    inline-size: 38%;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: 3px;
+    border: 1px solid var(--line-strong);
+    box-shadow: 0 18px 44px -18px rgb(0 0 0 / 0.9);
+  }
+
+  .hub-sx__photo {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+    scale: 1.16;
+    animation: hub-sx-focus 11s ease-in-out infinite;
+  }
+
+  @keyframes hub-sx-focus {
+    0%,
+    100% {
+      filter: blur(14px) grayscale(1) contrast(1.15) brightness(0.8);
+    }
+    55%,
+    78% {
+      filter: blur(2px) grayscale(1) contrast(1.15) brightness(0.85);
+    }
+  }
+
+  .hub-sx__veil {
+    position: absolute;
+    inset: 0;
+    background: var(--ink-950);
+    animation: hub-sx-tint 11s ease-in-out infinite;
+  }
+
+  .hub-sx__mark {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 700;
+    color: color-mix(in oklab, var(--paper) 85%, transparent);
+    animation: hub-sx-tint 11s ease-in-out infinite;
+  }
+
+  @keyframes hub-sx-tint {
+    0%,
+    100% {
+      opacity: 0.55;
+    }
+    55%,
+    78% {
+      opacity: 0.1;
+    }
+  }
+
+  .hub-sx__clues {
+    position: absolute;
+    inset-inline: 58% 8%;
+    inset-block-start: 50%;
+    translate: 0 -50%;
+    display: grid;
+  }
+
+  .hub-sx__stack {
+    grid-area: 1 / 1;
+    display: grid;
+  }
+
+  .hub-sx__clue {
+    grid-area: 1 / 1;
+    border-radius: 3px;
+    border: 1px solid var(--line-strong);
+    background: color-mix(in oklab, var(--surface) 90%, transparent);
+    padding: 0.5rem 0.625rem;
+    opacity: 0;
+    animation: hub-sx-clue 11s ease infinite both;
+    animation-delay: calc(var(--i) * 3.667s);
+  }
+
+  @keyframes hub-sx-clue {
+    0%,
+    4% {
+      opacity: 0;
+      translate: 0 8px;
+    }
+    10%,
+    27% {
+      opacity: 1;
+      translate: 0 0;
+    }
+    33%,
+    100% {
+      opacity: 0;
+      translate: 0 -8px;
+    }
+  }
+
+  .hub-sx__label {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 0.5rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+
+  .hub-sx__text {
+    display: block;
+    margin-block-start: 2px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--paper);
+  }
+
+  .hub-sx__pips {
+    grid-area: 2 / 1;
+    margin-block-start: 0.5rem;
+    display: flex;
+    justify-content: center;
+    gap: 0.35rem;
+  }
+
+  .hub-sx__pip {
+    inline-size: 0.32rem;
+    block-size: 0.32rem;
+    rotate: 45deg;
+    border: 1px solid var(--line-strong);
+  }
+
+  /* Only the first three are spent in the loop; the rest stay open. */
+  .hub-sx__pip[data-spends="true"] {
+    animation: hub-sx-pip 11s ease infinite both;
+    animation-delay: calc(var(--i) * 3.667s);
+  }
+
+  @keyframes hub-sx-pip {
+    0%,
+    9% {
+      background: transparent;
+      border-color: var(--line-strong);
+    }
+    10%,
+    100% {
+      background: var(--silver);
+      border-color: var(--silver);
+    }
+  }
+
+  /* --- Higher / Lower: matchups dealing through --- */
+
+  .hub-vs {
+    position: absolute;
+    inset-inline-start: 50%;
+    inset-block-start: 46%;
+    translate: -50% -50%;
+    rotate: 45deg;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    inline-size: 2.4rem;
+    block-size: 2.4rem;
+    border: 1px solid var(--line-hot);
+    background: color-mix(in oklab, var(--ink-950) 85%, transparent);
+    box-shadow: 0 0 30px color-mix(in oklab, var(--silver) 15%, transparent);
+  }
+
+  .hub-vs > span {
+    rotate: -45deg;
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--silver);
+  }
+
+  .hub-hl-in {
+    animation: hub-hl-in 520ms var(--ease) both;
+  }
+
+  .hub-hl-out {
+    animation: hub-hl-out 520ms var(--ease) both;
+  }
+
+  @keyframes hub-hl-in {
+    from {
+      opacity: 0;
+      translate: 45% 0;
+      rotate: 2deg;
+    }
+  }
+
+  @keyframes hub-hl-out {
+    to {
+      opacity: 0;
+      translate: -45% 0;
+      rotate: -2deg;
+    }
+  }
+
+  .hub-hl-val {
+    position: absolute;
+    inset-block-end: 7%;
+    padding: 2px 7px;
+    border-radius: 2px;
+    border: 1px solid var(--line-strong);
+    background: color-mix(in oklab, var(--ink-950) 85%, transparent);
+    font-family: var(--font-display);
+    font-size: 0.71875rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-faint);
+  }
+
+  .hub-hl-val.is-win {
+    border-color: var(--silver);
+    color: var(--paper);
+    box-shadow: 0 0 18px -4px color-mix(in oklab, var(--silver) 45%, transparent);
+  }
+}
