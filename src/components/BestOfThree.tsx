@@ -33,7 +33,7 @@ function save(id: string, value: Saved) {
   }
 }
 
-export function VaultGame({
+export function BestOfThree({
   initialPuzzle,
   puzzleNumber,
   vaultMeta,

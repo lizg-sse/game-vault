@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { VaultGame } from "@/components/VaultGame";
+import { BestOfThree } from "@/components/BestOfThree";
 import { getPracticePuzzle, gradeVault, revealRound } from "../actions";
 import { dailyPuzzle, puzzleNumber, todayInSanAntonio, vaultMeta } from "@/lib/puzzle";
 
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <VaultGame
+    <BestOfThree
       initialPuzzle={dailyPuzzle()}
       puzzleNumber={puzzleNumber(todayInSanAntonio())}
       vaultMeta={vaultMeta}
