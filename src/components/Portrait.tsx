@@ -53,6 +53,10 @@ export function Portrait({
       {/* The blackout figure. Stays mounted through the reveal so it can
           dissolve rather than pop. */}
       <span className="portrait__figure" aria-hidden="true" />
+
+      {/* The lights coming up: one warm swell over the face as the photo
+          arrives. A glow, not a band travelling across the plate. */}
+      {revealed && <span className="portrait__flash" aria-hidden="true" />}
     </span>
   );
 }

@@ -75,7 +75,7 @@ export function ResultPanel({
         >
           {won ? `Solved in ${cluesRevealed(game)}` : 'Out of turns'}
         </p>
-        <h2 className="mt-1 text-[26px] leading-tight font-semibold tracking-tight text-paper">
+        <h2 className="animate-name-stamp mt-1 text-[26px] leading-tight font-semibold tracking-tight text-paper">
           {player.name}
         </h2>
         <p className="mt-1 text-[13px] text-faint">
@@ -90,8 +90,12 @@ export function ResultPanel({
               [player.rpg.toFixed(1), 'RPG'],
               [player.apg.toFixed(1), 'APG'],
             ] as const
-          ).map(([value, label]) => (
-            <div key={label}>
+          ).map(([value, label], i) => (
+            <div
+              key={label}
+              className="animate-row-in"
+              style={{ animationDelay: `${360 + i * 70}ms` } as React.CSSProperties}
+            >
               <p className="text-[17px] font-semibold tabular-nums">{value}</p>
               <p className="font-display text-[9px] tracking-widest text-faint">{label}</p>
             </div>

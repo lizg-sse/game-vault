@@ -16,6 +16,9 @@ type Saved = { picks: string[]; done: boolean };
 
 const STORE_PREFIX = "spurs-vault:v1:";
 
+/** Deal-out runs 560ms with a 90ms stagger across the three cards. */
+const DEAL_MS = 740;
+
 function load(id: string): Saved | null {
   try {
     const raw = localStorage.getItem(STORE_PREFIX + id);
@@ -51,6 +54,8 @@ export function BestOfThree({
   const [puzzle, setPuzzle] = useState(initialPuzzle);
   const [phase, setPhase] = useState<Phase>("intro");
   const [roundIndex, setRoundIndex] = useState(0);
+  const [dealing, setDealing] = useState(false);
+  const dealTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [pickIds, setPickIds] = useState<string[]>([]);
   /** Identities, merged in only after a round is locked. */
   const [reveals, setReveals] = useState<Reveal>({});
@@ -62,6 +67,13 @@ export function BestOfThree({
   const round = puzzle.rounds[roundIndex];
   const currentPickId = pickIds[roundIndex];
   const decided = Boolean(currentPickId) && round?.options.every((o) => reveals[o.id]);
+
+  useEffect(
+    () => () => {
+      if (dealTimer.current) clearTimeout(dealTimer.current);
+    },
+    [],
+  );
 
   const persist = useCallback(
     (ids: string[], done: boolean) => {
@@ -127,8 +139,13 @@ export function BestOfThree({
       startTransition(async () => setGrade(await actions.gradeVault(puzzle.id, pickIds)));
       return;
     }
-    setRoundIndex((i) => i + 1);
-    stageRef.current?.scrollIntoView({ block: "start", behavior: "smooth" });
+    // The decided hand is thrown out before the next season is dealt in.
+    setDealing(true);
+    dealTimer.current = setTimeout(() => {
+      setDealing(false);
+      setRoundIndex((i) => i + 1);
+      stageRef.current?.scrollIntoView({ block: "start", behavior: "smooth" });
+    }, DEAL_MS);
   }
 
   function start() {
@@ -224,6 +241,7 @@ export function BestOfThree({
                   index={i}
                   state={!currentPickId ? "open" : player.id === currentPickId ? "picked" : "passed"}
                   revealed={Boolean(decided)}
+                  dealing={dealing}
                   onPick={() => choose(player)}
                 />
               ))}

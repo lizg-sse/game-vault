@@ -21,10 +21,14 @@ export function ClueStack({
   return (
     <div className="space-y-2">
       <ol className="space-y-2">
-        {clues.slice(0, revealed).map(clue => (
+        {clues.slice(0, revealed).map((clue, i) => (
           <li
             key={clue.key}
-            className="animate-clue-in rounded-[3px] border border-[var(--line)] bg-surface px-3.5 py-2.5"
+            // Only the clue that just landed turns over; the ones already on
+            // the table stay put rather than re-flipping on every render.
+            className={`rounded-[3px] border border-[var(--line)] bg-surface px-3.5 py-2.5 ${
+              i === revealed - 1 ? "animate-tile-flip origin-top [transform-style:preserve-3d]" : ""
+            }`}
           >
             <p className="font-display text-[10px] tracking-[0.14em] text-faint uppercase">
               {clue.label}

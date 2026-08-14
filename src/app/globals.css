@@ -299,6 +299,17 @@
   .pip[data-state="active"] {
     border-color: var(--silver);
     background: color-mix(in oklab, var(--silver) 30%, transparent);
+    animation: b3-breathe 3s ease-in-out infinite;
+  }
+
+  @keyframes b3-breathe {
+    0%,
+    100% {
+      opacity: 0.5;
+    }
+    50% {
+      opacity: 1;
+    }
   }
 }
 
@@ -363,7 +374,7 @@
     block-size: 0.4rem;
     rotate: 45deg;
     background: var(--silver);
-    opacity: 0.55;
+    animation: b3-breathe 4s ease-in-out infinite;
   }
 
   .intro__lede {
@@ -532,6 +543,19 @@
     line-height: 0.85;
     color: var(--paper);
     font-variant-numeric: lining-nums tabular-nums;
+  }
+
+  /* The stage remounts per round, so this replays as each season opens. */
+  .plate__year {
+    animation: b3-year-in 500ms var(--ease) both;
+  }
+
+  @keyframes b3-year-in {
+    from {
+      opacity: 0;
+      translate: 0 0.35em;
+      scale: 1 1.06;
+    }
   }
 
   .plate__year sup {
@@ -850,6 +874,32 @@
       opacity: 1;
       scale: 1;
       filter: grayscale(1) brightness(0.74) contrast(1.22);
+    }
+  }
+
+  /* One warm swell as the lights come up on the face. */
+  .portrait__flash {
+    grid-area: 1 / 1;
+    align-self: stretch;
+    justify-self: stretch;
+    pointer-events: none;
+    background: radial-gradient(
+      70% 60% at 50% 26%,
+      color-mix(in oklab, var(--paper) 14%, transparent),
+      transparent 65%
+    );
+    animation: b3-flash-up 1400ms ease-out both;
+  }
+
+  @keyframes b3-flash-up {
+    0% {
+      opacity: 0;
+    }
+    22% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
     }
   }
 
@@ -1571,15 +1621,33 @@
     }
   }
 
+  /* The hand is dealt in, and thrown out again when the round is decided —
+     the same gesture Higher / Lower uses between matchups. `backwards`, not
+     `both`, so the fill can't freeze `translate` and block the hover lift. */
   .card {
-    animation: card-in 420ms var(--ease) both;
-    animation-delay: calc(var(--i, 0) * 70ms);
+    animation: b3-deal-in 560ms var(--ease) backwards;
+    animation-delay: calc(var(--i, 0) * 90ms);
   }
 
-  @keyframes card-in {
+  .card[data-dealing="true"] {
+    animation: b3-deal-out 560ms cubic-bezier(0.55, 0, 0.75, 0.4) forwards;
+    /* Thrown out in the reverse of the order it arrived. */
+    animation-delay: calc((2 - var(--i, 0)) * 90ms);
+  }
+
+  @keyframes b3-deal-in {
     from {
       opacity: 0;
-      translate: 0 18px;
+      translate: 130% 0;
+      rotate: 3deg;
+    }
+  }
+
+  @keyframes b3-deal-out {
+    to {
+      opacity: 0;
+      translate: -130% 0;
+      rotate: -4deg;
     }
   }
 
@@ -2515,5 +2583,74 @@
     border-color: var(--silver);
     color: var(--paper);
     box-shadow: 0 0 18px -4px color-mix(in oklab, var(--silver) 45%, transparent);
+  }
+}
+
+/* ============================================================
+   SIX CLUES
+   Authored in Tailwind, so its motion is exposed as utilities
+   rather than component classes. The first five were referenced
+   by the components but never defined anywhere, so nothing moved;
+   the rest come from the redesign.
+   ============================================================ */
+
+@theme {
+  --animate-fade-in: sc-fade-in 200ms var(--ease) both;
+  --animate-sheet-in: sc-sheet-in 320ms var(--ease) both;
+  --animate-shake: sc-shake 420ms ease-in-out both;
+  --animate-pop-in: sc-pop-in 380ms var(--ease) both;
+  /* Each clue turns over as it lands, like a board flipping a letter. */
+  --animate-tile-flip: sc-tile-flip 480ms var(--ease) both;
+  --animate-stamp-in: sc-stamp-in 380ms var(--ease) 500ms both;
+  --animate-name-stamp: sc-name-stamp 460ms var(--ease) 260ms both;
+  --animate-row-in: sc-row-in 320ms var(--ease) both;
+}
+
+@keyframes sc-fade-in {
+  from { opacity: 0; }
+}
+
+@keyframes sc-sheet-in {
+  from { opacity: 0; translate: 0 100%; }
+}
+
+@keyframes sc-shake {
+  10%, 90% { translate: -2px 0; }
+  20%, 80% { translate: 4px 0; }
+  30%, 50%, 70% { translate: -7px 0; }
+  40%, 60% { translate: 7px 0; }
+}
+
+@keyframes sc-pop-in {
+  from { opacity: 0; scale: 0.96; }
+}
+
+@keyframes sc-tile-flip {
+  0% { transform: rotateX(-90deg); }
+  60% { transform: rotateX(14deg); }
+  100% { transform: rotateX(0deg); }
+}
+
+@keyframes sc-stamp-in {
+  from { opacity: 0; scale: 1.7; }
+  to { opacity: 1; scale: 1; }
+}
+
+@keyframes sc-name-stamp {
+  from { opacity: 0; scale: 1.55; }
+  to { opacity: 1; scale: 1; }
+}
+
+@keyframes sc-row-in {
+  from { opacity: 0; translate: 0 6px; }
+}
+
+@layer utilities {
+  /* The court-floor wash the games sit on. */
+  .app-bg {
+    background:
+      radial-gradient(120% 80% at 50% -10%, color-mix(in oklab, var(--silver) 7%, transparent), transparent 60%),
+      radial-gradient(90% 60% at 50% 110%, color-mix(in oklab, var(--ink-700) 70%, transparent), transparent 70%),
+      var(--bg);
   }
 }

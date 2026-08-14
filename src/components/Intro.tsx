@@ -17,12 +17,13 @@ export function Intro({
 
       <div>
         <p className="eyebrow" style={{ marginBlockEnd: "0.75rem" }}>
-          Vault No. {number} · {dateLabel}
+          No. {number} · {dateLabel}
         </p>
+        {/* The vault is the hub above this now; this screen is the game. */}
         <h1 className="intro__title">
-          The
+          Best
           <br />
-          Vault
+          of 3
         </h1>
       </div>
 

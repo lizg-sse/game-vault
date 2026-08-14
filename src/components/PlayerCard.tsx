@@ -13,6 +13,7 @@ export function PlayerCard({
   index,
   state,
   revealed,
+  dealing = false,
   onPick,
 }: {
   player: PublicPlayer;
@@ -21,6 +22,8 @@ export function PlayerCard({
   index: number;
   state: "open" | "picked" | "passed";
   revealed: boolean;
+  /** The round is over and this hand is being thrown out. */
+  dealing?: boolean;
   onPick: () => void;
 }) {
   const stats = headlineStats(player);
@@ -35,6 +38,7 @@ export function PlayerCard({
       data-state={state}
       data-revealed={revealed}
       data-locked={locked}
+      data-dealing={dealing || undefined}
       onClick={onPick}
       disabled={locked}
       aria-pressed={state === "picked"}

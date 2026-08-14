@@ -69,6 +69,12 @@ export function Headshot({
         )}
       </div>
 
+      {solved && (
+        <div className="animate-stamp-in absolute top-2 -right-3.5 z-3 rotate-[-4deg] rounded-[2px] bg-silver px-2 py-0.5 font-display text-[10px] font-bold tracking-[0.16em] text-ink uppercase">
+          Solved
+        </div>
+      )}
+
       {/* Puzzle-piece counter tucked into the frame's corner. */}
       {!done && (
         <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 rounded-[2px] border border-[var(--line-strong)] bg-ink px-2.5 py-1 font-display text-[10px] tracking-widest text-faint">
