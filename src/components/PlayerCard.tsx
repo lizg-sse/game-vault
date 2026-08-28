@@ -1,11 +1,10 @@
 "use client";
 
 import { Portrait } from "./Portrait";
+import { formatHeight } from "@/lib/best-of-three-selection";
 import { contextLine, headlineStats } from "@/lib/statline";
 import { ROLE_LABEL } from "@/lib/scoring";
 import type { Identity, PublicPlayer } from "@/lib/types";
-
-const LETTERS = ["A", "B", "C", "D", "E"] as const;
 
 export function PlayerCard({
   player,
@@ -27,7 +26,9 @@ export function PlayerCard({
   onPick: () => void;
 }) {
   const stats = headlineStats(player);
-  const letter = LETTERS[index] ?? "?";
+  const option = `Option ${index + 1}`;
+  const seasonLabel = player.season.label.replace("-", "–");
+  const height = formatHeight(player.height);
   const locked = state !== "open" || revealed;
 
   return (
@@ -48,18 +49,21 @@ export function PlayerCard({
       </span>
 
       <span className="card__head">
-        <span className="card__letter" aria-hidden="true">
-          {letter}
+        <span className="card__height">
+          <span className="stat__value">{height}</span>
+          <span className="stat__label">Height</span>
         </span>
         <span className="card__role">{ROLE_LABEL[player.role]}</span>
-        {player.age != null && <span className="card__age">Age {player.age}</span>}
+        <span className="card__status" aria-label={`${seasonLabel}, age ${player.age ?? "unknown"}`}>
+          <strong className="card__status-year">{seasonLabel}</strong>
+          <small className="card__status-age">Age {player.age ?? "—"}</small>
+        </span>
       </span>
 
       <Portrait
         src={identity?.img ?? null}
         name={identity?.name ?? null}
         revealed={revealed}
-        letter={letter}
         className="portrait card__portrait"
       />
 
@@ -75,14 +79,15 @@ export function PlayerCard({
       <span className="card__context">{contextLine(player)}</span>
 
       <span className="card__name">
-        <b>{identity?.name ?? `Player ${letter}`}</b>
+        <b>{identity?.name ?? option}</b>
         <span>{player.pos ?? ROLE_LABEL[player.role]}</span>
       </span>
 
       <span className="visually-hidden">
         {identity
           ? `${identity.name}. `
-          : `Player ${letter}, ${ROLE_LABEL[player.role]}. Select to add to your roster. `}
+          : `${option}, ${ROLE_LABEL[player.role]}. Select to add to your roster. `}
+        {seasonLabel}, age {player.age ?? "unknown"}, {height} tall. {" "}
         {stats.map((s) => `${s.value} ${s.label}`).join(", ")}. {contextLine(player)}
       </span>
     </button>

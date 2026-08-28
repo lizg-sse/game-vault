@@ -16,22 +16,19 @@ export function Portrait({
   name,
   revealed,
   size = 140,
-  letter,
   className,
 }: {
   src: string | null;
   name: string | null;
   revealed: boolean;
   size?: number;
-  /** Ghosted behind a redacted plate so each card still reads as A / B / C. */
-  letter?: string;
   className?: string;
 }) {
   const height = Math.round(size * 1.5);
   const state = !revealed ? "redacted" : src ? "photo" : "none";
 
   return (
-    <span className={className} data-portrait={state} data-letter={letter}>
+    <span className={className} data-portrait={state}>
       {revealed && src && (
         <Image
           src={src}

@@ -14,7 +14,7 @@ import type { Identity, Puzzle, PublicPlayer, Reveal } from "@/lib/types";
 type Phase = "intro" | "round" | "done";
 type Saved = { picks: string[]; done: boolean };
 
-const STORE_PREFIX = "spurs-vault:v1:";
+const STORE_PREFIX = "spurs-vault:v2:";
 
 /** Deal-out runs 560ms with a 90ms stagger across the three cards. */
 const DEAL_MS = 740;
@@ -44,7 +44,13 @@ export function BestOfThree({
 }: {
   initialPuzzle: Puzzle;
   puzzleNumber: number;
-  vaultMeta: { seasons: number; playerSeasons: number; first?: string; last?: string };
+  vaultMeta: {
+    seasons: number;
+    playerSeasons: number;
+    bestOfThreePlayerSeasons?: number;
+    first?: string;
+    last?: string;
+  };
   actions: {
     revealRound: (puzzleId: string, roundIndex: number) => Promise<Reveal>;
     gradeVault: (puzzleId: string, pickIds: string[]) => Promise<Grade>;
@@ -74,6 +80,14 @@ export function BestOfThree({
     },
     [],
   );
+
+  useEffect(() => {
+    if (!decided) return;
+    const frame = requestAnimationFrame(() => {
+      stageRef.current?.scrollIntoView({ block: "start", behavior: "smooth" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [decided]);
 
   const persist = useCallback(
     (ids: string[], done: boolean) => {
@@ -105,7 +119,10 @@ export function BestOfThree({
       }
 
       const at = Math.min(saved.picks.length, puzzle.rounds.length - 1);
-      const revealed = saved.picks[at] ? await actions.revealRound(puzzle.id, at) : {};
+      const revealedRounds = await Promise.all(
+        saved.picks.map((_, index) => actions.revealRound(puzzle.id, index)),
+      );
+      const revealed = Object.assign({}, ...revealedRounds);
       if (cancelled) return;
       setPickIds(saved.picks);
       setReveals(revealed);
@@ -151,6 +168,7 @@ export function BestOfThree({
   function start() {
     setPhase("round");
     setRoundIndex(0);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function startPractice() {
@@ -173,6 +191,9 @@ export function BestOfThree({
   );
 
   const chosen: Identity | null = currentPickId ? reveals[currentPickId] ?? null : null;
+  const chosenOption = currentPickId
+    ? round?.options.find((option) => option.id === currentPickId)
+    : null;
   const passed = round?.options.filter((o) => o.id !== currentPickId).map((o) => reveals[o.id]?.name);
 
   return (
@@ -202,9 +223,9 @@ export function BestOfThree({
                 role="img"
                 aria-label={`Round ${roundIndex + 1} of ${puzzle.rounds.length}`}
               >
-                {puzzle.rounds.map((r, i) => (
+                {puzzle.rounds.map((_, i) => (
                   <span
-                    key={r.season.year}
+                    key={i}
                     className="pip"
                     data-state={i < roundIndex ? "done" : i === roundIndex ? "active" : "open"}
                   />
@@ -247,11 +268,11 @@ export function BestOfThree({
               ))}
             </div>
 
-            {decided && chosen && (
+            {decided && chosen && chosenOption && (
               <div className="verdict">
                 <div className="verdict__text">
                   <b>
-                    Signed: {chosen.name}, <em>{round.season.label}</em>
+                    Signed: {chosen.name}, <em>{chosenOption.season.label}</em>
                   </b>
                   <span>{passed?.filter(Boolean).join(" and ")} stay in the vault.</span>
                 </div>
@@ -274,7 +295,7 @@ export function BestOfThree({
       </main>
 
       {phase === "round" && (
-        <RosterRail rounds={puzzle.rounds} identities={rosterIdentities} />
+        <RosterRail rounds={puzzle.rounds} pickIds={pickIds} identities={rosterIdentities} />
       )}
 
       <footer className="footer">
@@ -286,8 +307,8 @@ export function BestOfThree({
             {heading} · {puzzle.dateLabel}
           </span>
           <span>
-            {vaultMeta.first}–{vaultMeta.last?.slice(-2)} ·{" "}
-            {vaultMeta.playerSeasons.toLocaleString()} player seasons
+            {(vaultMeta.bestOfThreePlayerSeasons ?? vaultMeta.playerSeasons).toLocaleString()} eligible
+            player seasons · 2010s–20s + legends
           </span>
           <span className="footer__cry">Go Spurs Go</span>
         </div>

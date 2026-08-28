@@ -1,4 +1,19 @@
-import type { PublicPlayer } from "./types";
+import type { Player } from "./types";
+
+export type StatlinePlayer = Pick<
+  Player,
+  | "pts"
+  | "trb"
+  | "ast"
+  | "blk"
+  | "stl"
+  | "fg3Pct"
+  | "fg3a"
+  | "efgPct"
+  | "pct"
+  | "g"
+  | "mpg"
+>;
 
 export type Stat = { key: string; label: string; value: string; pct: number };
 
@@ -11,12 +26,12 @@ const fmtPct = (n: number) => (n * 100).toFixed(1).replace(/\.0$/, "");
  * a 0.4 BPG "specialty" would be noise, not a selling point.
  */
 const SECONDARY = [
-  { key: "trb", label: "RPG", get: (p: PublicPlayer) => p.trb, floor: 3.5, fmt: fmt1 },
-  { key: "ast", label: "APG", get: (p: PublicPlayer) => p.ast, floor: 2.5, fmt: fmt1 },
-  { key: "blk", label: "BPG", get: (p: PublicPlayer) => p.blk, floor: 0.8, fmt: fmt1 },
-  { key: "stl", label: "SPG", get: (p: PublicPlayer) => p.stl, floor: 1.1, fmt: fmt1 },
-  { key: "fg3Pct", label: "3P%", get: (p: PublicPlayer) => p.fg3Pct, floor: 0.34, fmt: fmtPct },
-  { key: "efgPct", label: "eFG%", get: (p: PublicPlayer) => p.efgPct, floor: 0.5, fmt: fmtPct },
+  { key: "trb", label: "RPG", get: (p: StatlinePlayer) => p.trb, floor: 3.5, fmt: fmt1 },
+  { key: "ast", label: "APG", get: (p: StatlinePlayer) => p.ast, floor: 2.5, fmt: fmt1 },
+  { key: "blk", label: "BPG", get: (p: StatlinePlayer) => p.blk, floor: 0.8, fmt: fmt1 },
+  { key: "stl", label: "SPG", get: (p: StatlinePlayer) => p.stl, floor: 1.1, fmt: fmt1 },
+  { key: "fg3Pct", label: "3P%", get: (p: StatlinePlayer) => p.fg3Pct, floor: 0.34, fmt: fmtPct },
+  { key: "efgPct", label: "eFG%", get: (p: StatlinePlayer) => p.efgPct, floor: 0.5, fmt: fmtPct },
 ] as const;
 
 /**
@@ -24,7 +39,7 @@ const SECONDARY = [
  * across the whole vault — so each card leads with what that season was
  * actually known for.
  */
-export function headlineStats(player: PublicPlayer, count = 2): Stat[] {
+export function headlineStats(player: StatlinePlayer, count = 2): Stat[] {
   const secondaries = SECONDARY.filter((s) => {
     const v = s.get(player);
     // A three-point rate only counts if they actually took threes.
@@ -47,7 +62,7 @@ export function headlineStats(player: PublicPlayer, count = 2): Stat[] {
 }
 
 /** The small print under the headline numbers. */
-export function contextLine(player: PublicPlayer): string {
+export function contextLine(player: StatlinePlayer): string {
   const bits = [`${player.g} GP`, `${fmt1(player.mpg)} MPG`];
   if (player.efgPct != null) bits.push(`${fmtPct(player.efgPct)} eFG%`);
   return bits.join("  ·  ");

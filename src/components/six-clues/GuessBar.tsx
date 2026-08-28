@@ -44,7 +44,7 @@ export function GuessBar({
   turns: Turn[]
   status: 'playing' | 'won' | 'lost'
   canHint: boolean
-  hintCount: number
+  hintCount: number | null
   onGuess: (player: Player) => void
   onSkip: () => void
   onHint: () => void
@@ -162,7 +162,9 @@ export function GuessBar({
                 <path d="M8 1a4.6 4.6 0 0 0-2.7 8.33c.3.22.48.55.5.91l.03.51h4.34l.03-.51c.02-.36.2-.69.5-.91A4.6 4.6 0 0 0 8 1ZM6 12.4h4v.6a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-.6Z" />
               </svg>
               Hint
-              <span className="font-display text-[11px] text-faint">{hintCount}</span>
+              {hintCount !== null && (
+                <span className="font-display text-[11px] text-faint">{hintCount}</span>
+              )}
             </button>
           )}
           <button

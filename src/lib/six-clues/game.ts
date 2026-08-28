@@ -1,4 +1,5 @@
 import { PLAYERS, type Player } from './players'
+import { COYOTE, COYOTE_ID } from './coyote'
 
 export type Mode = 'easy' | 'hard'
 
@@ -6,12 +7,34 @@ export const MAX_ROUNDS = 6
 /** Points for solving after 1…6 clues. Fewer clues, more points. */
 export const SCORE_BY_CLUES = [1000, 800, 600, 400, 250, 100]
 
-/** Easy draws only from widely-known Spurs; hard opens up the deeper cuts. */
+/**
+ * The game is about the modern Spurs era, with a few deliberately requested
+ * historical exceptions. `to` is the season's end year, so 1999 means the
+ * 1998–99 season.
+ */
+const REQUESTED_LEGACY_PLAYERS = new Set(['Avery Johnson', 'Dennis Rodman', 'Doc Rivers', 'George Gervin'])
+
+export function isInSixCluesScope(player: Player) {
+  return player.id === COYOTE_ID || player.to >= 1999 || REQUESTED_LEGACY_PLAYERS.has(player.name)
+}
+
+/** Easy draws only from tier 1; Hard adds every in-scope player. Coyote leads both. */
 export function poolFor(mode: Mode): Player[] {
-  return mode === 'easy' ? PLAYERS.filter(p => p.tier === 1) : PLAYERS
+  const scoped = [COYOTE, ...PLAYERS.filter(player => player.id !== COYOTE_ID && isInSixCluesScope(player))]
+  return mode === 'easy' ? scoped.filter(p => p.tier === 1) : scoped
+}
+
+/** The non-daily board walks this ordered pool, starting with Coyote. */
+export function playerForIndex(mode: Mode, index: number): Player {
+  const pool = poolFor(mode)
+  const within = ((index % pool.length) + pool.length) % pool.length
+  return pool[within]
 }
 
 // ---------------------------------------------------------------- daily pick
+
+// Daily mode is paused in the board for now, but these helpers stay intact so
+// the daily version can be restored without rebuilding the selection logic.
 
 const EPOCH = new Date(2026, 0, 1)
 
@@ -57,6 +80,7 @@ function shuffled<T>(items: T[], seed: number) {
  */
 export function playerForDay(mode: Mode, day: number): Player {
   const pool = poolFor(mode)
+  if (day === 0) return pool[0]
   const cycle = Math.floor(day / pool.length)
   const within = ((day % pool.length) + pool.length) % pool.length
   return shuffled(pool, hash(`${mode}:${cycle}`))[within]
@@ -92,6 +116,10 @@ export const newGame = (day: number, mode: Mode): GameState => ({
  */
 export const cluesRevealed = (s: GameState) =>
   Math.min(MAX_ROUNDS, s.status === 'won' ? s.turns.length : s.turns.length + 1)
+
+/** Keep the candidate list from solving the board when the field is already small. */
+export const shouldShowHintPlayers = (candidateCount: number, guessesRemaining: number) =>
+  candidateCount > guessesRemaining
 
 export const scoreFor = (s: GameState) =>
   s.status === 'won' ? SCORE_BY_CLUES[cluesRevealed(s) - 1] : 0
@@ -196,7 +224,9 @@ export function shareText(game: GameState) {
     return turn.kind === 'skip' ? '🟨' : '⬛'
   })
 
-  const head = `Six Clues #${game.day + 1} · ${game.mode === 'easy' ? 'Easy' : 'Hard'}`
+  // Daily share numbering is paused with the rest of the daily board:
+  // const head = `Six Clues #${game.day + 1} · ${game.mode === 'easy' ? 'Easy' : 'Hard'}`
+  const head = `Six Clues · ${game.mode === 'easy' ? 'Easy' : 'Hard'} · Player ${game.day + 1}`
   const line =
     game.status === 'won'
       ? `${cluesRevealed(game)}/${MAX_ROUNDS} clues · ${scoreFor(game)} pts`

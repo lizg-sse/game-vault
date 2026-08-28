@@ -22,8 +22,8 @@ export function HelpSheet({ open, onClose }: { open: boolean; onClose: () => voi
     <Sheet open={open} onClose={onClose} title="How to play">
       <ol className="space-y-3.5">
         <Step n={1} title="One Spur, one clue to start">
-          Every day picks a San Antonio Spur, past or present. You open with a single clue and a
-          photo blurred past recognition.
+          Start with Coyote, then work through the San Antonio Spurs archive one player at a time.
+          You open each board with a single clue and a photo blurred past recognition.
         </Step>
         <Step n={2} title="Guess or skip — both cost a clue">
           A wrong guess reveals the next clue and sharpens the photo, and so does skipping. You get{' '}
@@ -56,7 +56,7 @@ export function HelpSheet({ open, onClose }: { open: boolean; onClose: () => voi
           name, and the <span className="text-fiesta-orange">Hint</span> button lists everyone the
           clues haven&rsquo;t ruled out yet.{' '}
           <span className="font-semibold text-paper">Hard</span> reaches deep into the franchise
-          register with no hints — and has its own player each day.
+          register with no hints.
         </p>
       </div>
     </Sheet>

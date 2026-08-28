@@ -5,9 +5,11 @@ import type { Identity, Round } from "@/lib/types";
 
 export function RosterRail({
   rounds,
+  pickIds,
   identities,
 }: {
   rounds: Round[];
+  pickIds: string[];
   identities: (Identity | null)[];
 }) {
   const filled = identities.filter(Boolean).length;
@@ -22,8 +24,9 @@ export function RosterRail({
         <ul className="rail__slots">
           {rounds.map((round, i) => {
             const player = identities[i];
+            const picked = round.options.find((option) => option.id === pickIds[i]);
             return (
-              <li key={round.season.year} className="slot" data-filled={Boolean(player)}>
+              <li key={i} className="slot" data-filled={Boolean(player)}>
                 {player ? (
                   <>
                     <Portrait
@@ -32,9 +35,11 @@ export function RosterRail({
                       revealed
                       className="portrait portrait--slot"
                     />
-                    <span className="slot__year">{`'${round.season.label.slice(-2)}`}</span>
+                    <span className="slot__year">
+                      {picked ? `'${picked.season.label.slice(-2)}` : `R${i + 1}`}
+                    </span>
                     <span className="visually-hidden">
-                      Round {i + 1}: {player.name}, {round.season.label}
+                      Round {i + 1}: {player.name}, {picked?.season.label ?? "season unknown"}
                     </span>
                   </>
                 ) : (

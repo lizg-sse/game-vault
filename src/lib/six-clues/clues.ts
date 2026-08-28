@@ -1,10 +1,10 @@
+import { HINTS, type HintRule } from './hints'
 import type { Player } from './players'
 
-export type ClueKey = 'era' | 'position' | 'honors' | 'height' | 'tenure' | 'origin'
+export type ClueKey = string
 
 export type Clue = {
   key: ClueKey
-  label: string
   value: string
   /**
    * True when `p` is consistent with this clue. Each predicate tests exactly what
@@ -55,19 +55,19 @@ function mainDecade(p: Player) {
 }
 
 const HEIGHT_BANDS = [
-  { max: 74, label: 'Under 6′3″' },
-  { max: 78, label: '6′3″ – 6′6″' },
-  { max: 81, label: '6′7″ – 6′9″' },
-  { max: Infinity, label: '6′10″ or taller' },
+  { max: 74 },
+  { max: 78 },
+  { max: 81 },
+  { max: Infinity },
 ]
 const heightBand = (p: Player) => HEIGHT_BANDS.findIndex(b => heightInInches(p) <= b.max)
 
 const PPG_BANDS = [
-  { max: 5.99, label: 'under 6 PPG' },
-  { max: 9.99, label: '6–10 PPG' },
-  { max: 14.99, label: '10–15 PPG' },
-  { max: 19.99, label: '15–20 PPG' },
-  { max: Infinity, label: '20+ PPG' },
+  { max: 5.99 },
+  { max: 9.99 },
+  { max: 14.99 },
+  { max: 19.99 },
+  { max: Infinity },
 ]
 const ppgBand = (p: Player) => PPG_BANDS.findIndex(b => p.ppg <= b.max)
 
@@ -76,64 +76,49 @@ const primaryPosition = (p: Player) => p.position.split('-')[0]
 
 const hasRing = (p: Player) => p.titles.length > 0
 const wasAllStar = (p: Player) => p.allStar > 0
-
-function honorsText(p: Player) {
-  if (hasRing(p) && wasAllStar(p)) return 'Won a title in San Antonio, and made an All-Star team'
-  if (hasRing(p)) return 'Won a title in San Antonio, never an All-Star'
-  if (wasAllStar(p)) return 'Made an All-Star team, but no title in San Antonio'
-  return 'No title in San Antonio, no All-Star selection'
+function matchesRule(rule: HintRule, target: Player, candidate: Player) {
+  switch (rule) {
+    case 'target':
+      return candidate.id === target.id
+    case 'same-decade':
+      return mainDecade(candidate) === mainDecade(target)
+    case 'same-position':
+      return primaryPosition(candidate) === primaryPosition(target)
+    case 'same-height-band':
+      return heightBand(candidate) === heightBand(target)
+    case 'same-tenure':
+      return candidate.seasons === target.seasons
+    case 'same-scoring-band':
+      return ppgBand(candidate) === ppgBand(target)
+    case 'same-school':
+      return candidate.school === target.school
+    case 'same-country':
+      return candidate.country === target.country
+    case 'same-draft-round':
+      return candidate.draftRound === target.draftRound
+    case 'same-honors':
+      return hasRing(candidate) === hasRing(target) && wasAllStar(candidate) === wasAllStar(target)
+    case 'same-title-status':
+      return hasRing(candidate) === hasRing(target)
+    case 'same-defense':
+      return candidate.allDef > 0 === target.allDef > 0
+  }
 }
 
-const plural = (n: number, one: string) => `${n} ${one}${n === 1 ? '' : 's'}`
-
 /**
- * Six clues, broad to narrow. The bands are deliberately coarse early on: exact
- * values would cut the field to one player within a couple of turns and end the
- * game before it starts.
+ * Returns the target's authored pack. Some clues are broad and share a
+ * predicate with other players; a specific story uses the target predicate
+ * because the text should never rule out a player it actually describes.
  */
 export function buildClues(target: Player): Clue[] {
-  const decade = mainDecade(target)
-  const band = heightBand(target)
-  const scoring = ppgBand(target)
+  const pack = HINTS[target.id]
+  if (!pack) throw new Error(`No authored Six Clues pack for ${target.name} (${target.id})`)
 
-  return [
-    {
-      key: 'era',
-      label: 'Era',
-      value: `Wore silver & black in the ${decade}s`,
-      matches: p => decades(p).includes(decade),
-    },
-    {
-      key: 'position',
-      label: 'Position',
-      value: primaryPosition(target),
-      matches: p => primaryPosition(p) === primaryPosition(target),
-    },
-    {
-      key: 'honors',
-      label: 'Honors',
-      value: honorsText(target),
-      matches: p => hasRing(p) === hasRing(target) && wasAllStar(p) === wasAllStar(target),
-    },
-    {
-      key: 'height',
-      label: 'Height',
-      value: HEIGHT_BANDS[band].label,
-      matches: p => heightBand(p) === band,
-    },
-    {
-      key: 'tenure',
-      label: 'In San Antonio',
-      value: `${plural(target.seasons, 'season')} · ${PPG_BANDS[scoring].label}`,
-      matches: p => p.seasons === target.seasons && ppgBand(p) === scoring,
-    },
-    {
-      key: 'origin',
-      label: 'Before the NBA',
-      value: target.school,
-      matches: p => p.school === target.school,
-    },
-  ]
+  return pack.map(hint => ({
+    key: hint.key,
+    value: hint.text,
+    matches: (candidate: Player) => matchesRule(hint.rule, target, candidate),
+  }))
 }
 
 /** Players consistent with every clue revealed so far. */

@@ -47,7 +47,7 @@ richard-jefferson george-hill artis-gilmore alvin-robertson terry-cummings domin
 dennis-rodman stephon-castle jeremy-sochan deaaron-fox chris-paul harrison-barnes
 malik-rose nazr-mohammed brent-barry antonio-mcdyess rod-strickland tre-jones
 lonnie-walker-iv dylan-harper james-silas larry-kenon mike-mitchell johnny-moore
-willie-anderson vinny-del-negro mario-elie terry-porter dale-ellis`
+willie-anderson vinny-del-negro mario-elie terry-porter dale-ellis doc-rivers`
 
 /** Deeper cuts, added on top of tier 1 in Hard mode. */
 const TIER2 = `doug-mcdermott chuck-person gary-neal dejuan-blair cory-joseph jonathon-simmons

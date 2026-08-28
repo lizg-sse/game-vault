@@ -8,7 +8,13 @@ export function Intro({
 }: {
   dateLabel: string;
   number: number;
-  vaultMeta: { seasons: number; playerSeasons: number; first?: string; last?: string };
+  vaultMeta: {
+    seasons: number;
+    playerSeasons: number;
+    bestOfThreePlayerSeasons?: number;
+    first?: string;
+    last?: string;
+  };
   children: React.ReactNode;
 }) {
   return (
@@ -32,14 +38,14 @@ export function Intro({
       </div>
 
       <p className="intro__lede">
-        Five seasons out of Spurs history. Three anonymous players from each roster — nothing but
-        their numbers. <strong>Build the best five-man team you can.</strong>
+        Five rounds. Three comparable Spurs player-seasons in each — nothing but their numbers.
+        <strong>Build the best five-man team you can.</strong>
       </p>
 
       <div className="intro__steps">
         <div className="intro__step">
           <b>01</b>
-          <span>A season opens. Three real Spurs from that roster, listed only by their stat line.</span>
+          <span>A matchup opens. Three real Spurs seasons, listed only by their stat line.</span>
         </div>
         <div className="intro__step">
           <b>02</b>
@@ -56,8 +62,8 @@ export function Intro({
       {children}
 
       <p className="intro__note">
-        {vaultMeta.playerSeasons.toLocaleString()} real player seasons · {vaultMeta.seasons} years ·{" "}
-        {vaultMeta.first} to {vaultMeta.last}
+        {(vaultMeta.bestOfThreePlayerSeasons ?? vaultMeta.playerSeasons).toLocaleString()} eligible
+        player seasons · 2010s–20s focus + named legends
       </p>
     </div>
   );

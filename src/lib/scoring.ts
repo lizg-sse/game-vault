@@ -1,4 +1,4 @@
-import type { Player, SeasonInfo } from "./types";
+import type { Player, PlayerSeason, SeasonInfo } from "./types";
 
 /**
  * THE VAULT SCORE — 100 points, four components.
@@ -58,19 +58,22 @@ const TIERS: { min: number; name: string; note: string }[] = [
 ];
 
 export function gradeRoster(
-  rounds_: { season: SeasonInfo; options: Player[] }[],
+  rounds_: { options: PlayerSeason[] }[],
   pickIds: string[],
   benchmarks: { p50: number; p90: number }
 ): Grade {
   const rounds: RoundGrade[] = rounds_.map((round, i) => {
-    const pick = round.options.find((p) => p.id === pickIds[i]) ?? round.options[0];
-    const ordered = [...round.options].sort((a, b) => b.impact - a.impact);
+    const picked = round.options.find((row) => row.player.id === pickIds[i]) ?? round.options[0];
+    if (!picked) throw new Error(`Round ${i + 1} has no player options`);
+    const ordered = [...round.options].sort((a, b) => b.player.impact - a.player.impact);
+    const pick = picked.player;
+    const best = ordered[0].player;
     return {
-      season: round.season,
+      season: picked.season,
       pick,
-      best: ordered[0],
-      rank: ordered.findIndex((p) => p.id === pick.id) + 1,
-      ratio: ordered[0].impact > 0 ? pick.impact / ordered[0].impact : 1,
+      best,
+      rank: ordered.findIndex(({ player }) => player.id === pick.id) + 1,
+      ratio: best.impact > 0 ? pick.impact / best.impact : 1,
     };
   });
 

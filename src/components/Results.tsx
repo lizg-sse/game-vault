@@ -105,11 +105,11 @@ export function Results({
           <h3 className="eyebrow">The roster you built</h3>
         </div>
         <div className="review">
-          {grade.rounds.map((r) => {
+          {grade.rounds.map((r, i) => {
             const stats = headlineStats(r.pick, 2);
             const missed = r.rank > 1;
             return (
-              <article key={r.season.year} className="review__row">
+              <article key={`${i}-${r.pick.id}`} className="review__row">
                 <Portrait
                   src={r.pick.img}
                   name={r.pick.name}

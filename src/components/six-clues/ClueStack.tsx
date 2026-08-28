@@ -5,7 +5,7 @@ import { MAX_ROUNDS } from '@/lib/six-clues/game'
 
 export type GuessNote = {
   name: string
-  /** Label of the first revealed clue this guess contradicts, or null if it fits them all. */
+  /** Number of the first revealed clue this guess contradicts, or null if it fits them all. */
   ruledOutBy: string | null
 }
 
@@ -30,17 +30,14 @@ export function ClueStack({
               i === revealed - 1 ? "animate-tile-flip origin-top [transform-style:preserve-3d]" : ""
             }`}
           >
-            <p className="font-display text-[10px] tracking-[0.14em] text-faint uppercase">
-              {clue.label}
-            </p>
-            <p className="mt-0.5 text-[15px] leading-snug font-semibold text-paper">{clue.value}</p>
+            <p className="text-[15px] leading-snug font-semibold text-paper">{clue.value}</p>
           </li>
         ))}
       </ol>
 
       {revealed < MAX_ROUNDS && (
         <ul className="space-y-2" aria-hidden>
-          {clues.slice(revealed).map(clue => (
+          {clues.slice(revealed).map((clue, i) => (
             <li
               key={clue.key}
               className="flex items-center gap-2 rounded-[3px] border border-dashed border-[var(--line)] px-3.5 py-2.5 opacity-45"
@@ -49,7 +46,7 @@ export function ClueStack({
                 <path d="M8 1a3.2 3.2 0 0 0-3.2 3.2V6H4.4A1.4 1.4 0 0 0 3 7.4v5.2A1.4 1.4 0 0 0 4.4 14h7.2a1.4 1.4 0 0 0 1.4-1.4V7.4A1.4 1.4 0 0 0 11.6 6h-.4V4.2A3.2 3.2 0 0 0 8 1Zm1.8 5H6.2V4.2a1.8 1.8 0 1 1 3.6 0V6Z" />
               </svg>
               <span className="font-display text-[10px] tracking-[0.14em] text-faint uppercase">
-                {clue.label}
+                Clue {i + revealed + 1}
               </span>
             </li>
           ))}

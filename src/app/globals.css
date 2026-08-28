@@ -725,45 +725,59 @@
     margin-block-end: auto;
   }
 
-  .card__letter {
+  .card__height {
     display: grid;
-    place-items: center;
-    inline-size: 1.625rem;
-    block-size: 1.625rem;
-    border: 1px solid var(--line-strong);
-    border-radius: 2px;
-    font-family: var(--font-display);
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: var(--silver);
-    transition: background-color var(--dur) var(--ease), color var(--dur) var(--ease),
-      border-color var(--dur) var(--ease);
+    gap: 0.15rem;
+    min-inline-size: 3.9rem;
   }
 
-  .card[data-state="picked"] .card__letter {
-    background: var(--silver);
-    border-color: var(--silver);
-    color: var(--ink-950);
+  .card__height .stat__value {
+    font-size: 1.5rem;
+    letter-spacing: -0.02em;
+  }
+
+  .card__height .stat__label {
+    color: var(--silver-dim);
   }
 
   .card__role {
     font-family: var(--font-display);
-    font-size: 0.625rem;
-    font-weight: 500;
-    letter-spacing: 0.18em;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--text-faint);
+    color: var(--silver);
   }
 
-  .card__age {
+  .card__status {
     margin-inline-start: auto;
-    font-size: 0.6875rem;
-    color: var(--text-faint);
+    display: grid;
+    justify-items: end;
+    gap: 0.18rem;
+    min-inline-size: 4.45rem;
+    padding: 0.3rem 0.45rem 0.28rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 2px;
+    background: color-mix(in oklab, var(--ink-950) 74%, transparent);
+    text-align: end;
+    line-height: 1;
+  }
+
+  .card__status-year {
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--paper);
     font-variant-numeric: tabular-nums;
   }
 
-  .card[data-state="picked"] .card__age {
-    visibility: hidden;
+  .card__status-age {
+    font-size: 0.5625rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
   }
 
   /* ---------- the figure ----------
@@ -1020,7 +1034,7 @@
 
   .card__stamp {
     position: absolute;
-    inset-block-start: 0.875rem;
+    inset-block-start: 3.8rem;
     inset-inline-end: 0.875rem;
     z-index: 2;
     padding: 0.2rem 0.5rem;

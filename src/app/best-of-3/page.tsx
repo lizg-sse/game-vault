@@ -9,7 +9,7 @@ export const revalidate = 3600;
 export const metadata: Metadata = {
   title: "Best of 3 — The Vault",
   description:
-    "Five seasons from Spurs history. Three anonymous players each. Build the best five-man roster you can.",
+    "Five rounds of comparable Spurs player-seasons. Build the best five-man roster you can.",
 };
 
 export default function Page() {

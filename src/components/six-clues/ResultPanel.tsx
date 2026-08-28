@@ -1,9 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import type { Player } from '@/lib/six-clues/players'
+import { isCoyote } from '@/lib/six-clues/coyote'
 import { formatHeight, tenureLabel } from '@/lib/six-clues/clues'
-import { cluesRevealed, msUntilTomorrow, scoreFor, shareText, type GameState } from '@/lib/six-clues/game'
+import { cluesRevealed, scoreFor, shareText, type GameState } from '@/lib/six-clues/game'
 
 function accolades(p: Player) {
   const out: string[] = []
@@ -19,33 +20,19 @@ function accolades(p: Player) {
   return out
 }
 
-function Countdown() {
-  const [ms, setMs] = useState(() => msUntilTomorrow())
-
-  useEffect(() => {
-    const id = setInterval(() => setMs(msUntilTomorrow()), 1000)
-    return () => clearInterval(id)
-  }, [])
-
-  const total = Math.max(0, Math.floor(ms / 1000))
-  const pad = (n: number) => String(n).padStart(2, '0')
-  return (
-    <span className="font-display tabular-nums">
-      {pad(Math.floor(total / 3600))}:{pad(Math.floor(total / 60) % 60)}:{pad(total % 60)}
-    </span>
-  )
-}
-
 export function ResultPanel({
   player,
   game,
   onStats,
+  onNext,
 }: {
   player: Player
   game: GameState
   onStats: () => void
+  onNext: () => void
 }) {
   const won = game.status === 'won'
+  const coyote = isCoyote(player)
   const [copied, setCopied] = useState(false)
 
   const share = async () => {
@@ -79,31 +66,34 @@ export function ResultPanel({
           {player.name}
         </h2>
         <p className="mt-1 text-[13px] text-faint">
-          {player.position} · {formatHeight(player.height)}
-          {player.jersey ? ` · #${player.jersey}` : ''}
+          {coyote ? 'San Antonio Spurs mascot' : `${player.position} · ${formatHeight(player.height)}${player.jersey ? ` · #${player.jersey}` : ''}`}
         </p>
 
-        <div className="mt-3 grid grid-cols-3 gap-2 border-y border-[var(--line)] py-3">
-          {(
-            [
-              [player.ppg.toFixed(1), 'PPG'],
-              [player.rpg.toFixed(1), 'RPG'],
-              [player.apg.toFixed(1), 'APG'],
-            ] as const
-          ).map(([value, label], i) => (
-            <div
-              key={label}
-              className="animate-row-in"
-              style={{ animationDelay: `${360 + i * 70}ms` } as React.CSSProperties}
-            >
-              <p className="text-[17px] font-semibold tabular-nums">{value}</p>
-              <p className="font-display text-[9px] tracking-widest text-faint">{label}</p>
+        {!coyote && (
+          <>
+            <div className="mt-3 grid grid-cols-3 gap-2 border-y border-[var(--line)] py-3">
+              {(
+                [
+                  [player.ppg.toFixed(1), 'PPG'],
+                  [player.rpg.toFixed(1), 'RPG'],
+                  [player.apg.toFixed(1), 'APG'],
+                ] as const
+              ).map(([value, label], i) => (
+                <div
+                  key={label}
+                  className="animate-row-in"
+                  style={{ animationDelay: `${360 + i * 70}ms` } as React.CSSProperties}
+                >
+                  <p className="text-[17px] font-semibold tabular-nums">{value}</p>
+                  <p className="font-display text-[9px] tracking-widest text-faint">{label}</p>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        <p className="mt-2 text-[12px] text-faint">
-          {tenureLabel(player)} · {player.games} games in silver &amp; black
-        </p>
+            <p className="mt-2 text-[12px] text-faint">
+              {tenureLabel(player)} · {player.games} games in silver &amp; black
+            </p>
+          </>
+        )}
 
         {honours.length > 0 && (
           <div className="mt-3 flex flex-wrap justify-center gap-1.5">
@@ -149,9 +139,12 @@ export function ResultPanel({
         </button>
       </div>
 
-      <p className="text-center text-[12px] text-faint">
-        Next Spur in <Countdown />
-      </p>
+      <button
+        onClick={onNext}
+        className="w-full rounded-[3px] bg-fiesta-teal py-3 text-[14px] font-semibold text-ink transition-opacity active:opacity-80"
+      >
+        Next player →
+      </button>
     </div>
   )
 }

@@ -3,23 +3,21 @@
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Player } from '@/lib/six-clues/players'
-import { buildClues, contradiction, stillInPlay } from '@/lib/six-clues/clues'
+import { buildClues, stillInPlay } from '@/lib/six-clues/clues'
 import { useIsClient } from '@/lib/six-clues/useIsClient'
 import {
   MAX_ROUNDS,
   cluesRevealed,
-  dayIndex,
-  loadGame,
   loadMode,
   loadSeenHelp,
   loadStats,
   newGame,
-  playerForDay,
+  playerForIndex,
   poolFor,
   recordResult,
-  saveGame,
   saveMode,
   saveSeenHelp,
+  shouldShowHintPlayers,
   type GameState,
   type Mode,
 } from '@/lib/six-clues/game'
@@ -91,18 +89,24 @@ export function Game() {
 
 function Board() {
   const [boot] = useState(() => {
-    const day = dayIndex()
     const mode = loadMode()
+    const playerIndex = 0
+
+    // Daily mode is paused for now. Keep the old restore path here for when
+    // the daily board is turned back on.
+    // const day = dayIndex()
+    // const game = loadGame(mode, day) ?? newGame(day, mode)
+
     return {
-      day,
+      playerIndex,
       mode,
-      game: loadGame(mode, day) ?? newGame(day, mode),
+      game: newGame(playerIndex, mode),
       stats: loadStats(mode),
       seenHelp: loadSeenHelp(),
     }
   })
 
-  const day = boot.day
+  const [playerIndex, setPlayerIndex] = useState(boot.playerIndex)
   const [mode, setMode] = useState<Mode>(boot.mode)
   const [game, setGame] = useState<GameState>(boot.game)
   const [stats, setStats] = useState(boot.stats)
@@ -125,17 +129,21 @@ function Board() {
     (next: Mode) => {
       setMode(next)
       saveMode(next)
-      setGame(loadGame(next, day) ?? newGame(day, next))
+      setPlayerIndex(0)
+      // Daily restore is paused for now:
+      // setGame(loadGame(next, day) ?? newGame(day, next))
+      setGame(newGame(0, next))
       setStats(loadStats(next))
       setFlash('')
     },
-    [day]
+    []
   )
 
-  const target = useMemo(() => playerForDay(mode, day), [mode, day])
+  const target = useMemo(() => playerForIndex(mode, playerIndex), [mode, playerIndex])
   const clues = useMemo(() => buildClues(target), [target])
   const pool = useMemo(() => poolFor(mode), [mode])
   const revealed = cluesRevealed(game)
+  const guessesRemaining = Math.max(0, MAX_ROUNDS - game.turns.length)
 
   const guessedNames = useMemo(
     () => game.turns.flatMap(t => (t.kind === 'guess' ? [t.name] : [])),
@@ -150,7 +158,8 @@ function Board() {
       if (!guessed) continue
       // Judged against every clue on the table now, not just the ones showing when
       // the guess was made — so a later clue can explain an earlier miss.
-      out.push({ name: turn.name, ruledOutBy: contradiction(guessed, clues, revealed)?.label ?? null })
+      const clueIndex = clues.slice(0, revealed).findIndex(clue => !clue.matches(guessed))
+      out.push({ name: turn.name, ruledOutBy: clueIndex >= 0 ? `clue ${clueIndex + 1}` : null })
     }
     return out
   }, [game, pool, clues, revealed])
@@ -159,9 +168,11 @@ function Board() {
     () => stillInPlay(pool, clues, revealed, guessedNames),
     [pool, clues, revealed, guessedNames]
   )
+  const showHintPlayers = shouldShowHintPlayers(candidates.length, guessesRemaining)
 
   const commit = useCallback((next: GameState) => {
-    saveGame(next)
+    // Daily persistence is paused for now:
+    // saveGame(next)
     setGame(next)
     if (next.status !== 'playing') setStats(recordResult(next.mode, next))
   }, [])
@@ -195,6 +206,17 @@ function Board() {
     commit({ ...game, turns, status: turns.length >= MAX_ROUNDS ? 'lost' : 'playing' })
   }, [game, commit])
 
+  const onNext = useCallback(() => {
+    if (game.status === 'playing') return
+    const nextIndex = (playerIndex + 1) % pool.length
+    setPlayerIndex(nextIndex)
+    setGame(newGame(nextIndex, mode))
+    setFlash('')
+    setShake(0)
+    setSheet(null)
+    scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [game.status, mode, playerIndex, pool.length])
+
   // Keep the newest clue in view as the stack grows past the fold.
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
@@ -217,7 +239,9 @@ function Board() {
           </h1>
         </div>
 
-        <span className="font-display text-[10px] tracking-[0.16em] text-faint">No. {day + 1}</span>
+        <span className="font-display text-[10px] tracking-[0.16em] text-faint">
+          Player {playerIndex + 1}
+        </span>
 
         <ModeToggle mode={mode} onChange={switchMode} />
 
@@ -247,7 +271,7 @@ function Board() {
           />
 
           {over ? (
-            <ResultPanel player={target} game={game} onStats={() => setSheet('stats')} />
+            <ResultPanel player={target} game={game} onStats={() => setSheet('stats')} onNext={onNext} />
           ) : (
             <ClueStack clues={clues} revealed={revealed} notes={notes} />
           )}
@@ -270,7 +294,7 @@ function Board() {
               turns={game.turns}
               status={game.status}
               canHint={mode === 'easy'}
-              hintCount={candidates.length}
+              hintCount={showHintPlayers ? candidates.length : null}
               onGuess={onGuess}
               onSkip={onSkip}
               onHint={() => setSheet('hint')}
@@ -285,6 +309,7 @@ function Board() {
         onClose={closeSheet}
         candidates={candidates}
         revealed={revealed}
+        showCandidates={showHintPlayers}
         onPick={onGuess}
       />
       <StatsSheet

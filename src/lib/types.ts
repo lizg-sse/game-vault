@@ -29,12 +29,24 @@ export type Player = {
   pct: Record<string, number | null>;
 };
 
+/** A player-season pair is the atomic card in Best of 3. */
+export type PlayerSeason = {
+  season: SeasonInfo;
+  player: Player;
+};
+
+/** The small amount of season context shown on an anonymous card. */
+export type SeasonRef = Pick<SeasonInfo, "year" | "label">;
+
 /**
  * What the browser is allowed to know before a pick is locked in: the season's
  * numbers and nothing that identifies the player. Name, portrait and impact
  * score stay on the server so the answer isn't sitting in the page source.
  */
-export type PublicPlayer = Omit<Player, "name" | "img" | "impact">;
+export type PublicPlayer = Omit<Player, "name" | "img" | "impact"> & {
+  season: SeasonRef;
+  height: string;
+};
 
 /** Returned by the reveal action once a round is decided. */
 export type Identity = { name: string; img: string | null };
@@ -60,9 +72,8 @@ export type Season = {
 
 export type SeasonInfo = Omit<Season, "players">;
 
-/** One round: a season, and the three players offered from that roster. */
+/** One round: three comparable player-seasons offered for one roster spot. */
 export type Round = {
-  season: SeasonInfo;
   options: PublicPlayer[];
 };
 

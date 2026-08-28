@@ -4,7 +4,6 @@ import { BestOfThreePreview, SixCluesPreview } from "@/components/hub/Previews";
 import { HigherLowerPreview } from "@/components/hub/HigherLowerPreview";
 import { formatDateLabel, puzzleNumber, todayInSanAntonio, vaultMeta } from "@/lib/puzzle";
 import { PLAYERS } from "@/lib/players";
-import { dayIndex } from "@/lib/six-clues/game";
 
 // The slate turns over at midnight in San Antonio.
 export const revalidate = 3600;
@@ -22,11 +21,6 @@ export default function Page() {
   const iso = todayInSanAntonio();
   const number = puzzleNumber(iso);
   const dateLabel = formatDateLabel(iso);
-  // Six Clues numbers its own days from its own epoch. Anchor it to San
-  // Antonio's date (midday, so DST can't tip it) rather than the server's
-  // timezone, so the badge agrees with the rest of the slate.
-  const sixCluesNumber = dayIndex(new Date(`${iso}T12:00:00`)) + 1;
-
   const games: Game[] = [
     {
       href: "/best-of-3",
@@ -34,16 +28,16 @@ export default function Page() {
       badge: `Daily · No. ${number}`,
       meta: "5 rounds",
       blurb:
-        "Five seasons from the archive, three unnamed stat lines each. Sign one and build the best five-man roster you can.",
+        "Five rounds, three comparable Spurs player-seasons at a time. Sign one and build the best five-man roster you can.",
       preview: <BestOfThreePreview />,
     },
     {
       href: "/six-clues",
       title: "Six Clues",
-      badge: `Daily · No. ${sixCluesNumber}`,
+      badge: "Endless",
       meta: "6 turns",
       blurb:
-        "One Spur a day behind a photo blurred past recognition. Every clue sharpens the picture — and costs you points.",
+        "Six clues, one player at a time. Start with Coyote, then keep going through the archive.",
       preview: <SixCluesPreview />,
     },
     {
@@ -89,7 +83,7 @@ export default function Page() {
         <section className="hub-hero shell">
           <SpurMark className="hub-hero__crest" title="San Antonio Spurs" />
           <div className="hub-rise" style={{ "--d": "80ms" } as React.CSSProperties}>
-            <p className="eyebrow mb-3.5">Three daily games · 52 years of box scores</p>
+            <p className="eyebrow mb-3.5">Two daily games · one endless archive</p>
             <h1 className="hub-hero__title">
               The
               <br />
@@ -108,7 +102,7 @@ export default function Page() {
             style={{ "--d": "240ms" } as React.CSSProperties}
           >
             Every player who ever wore silver and black, sealed in one archive.{" "}
-            <strong>Open it once a day.</strong>
+            <strong>Open it and keep going.</strong>
           </p>
         </section>
 

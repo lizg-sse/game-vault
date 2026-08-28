@@ -22,9 +22,6 @@ export function SeasonPlate({
   index: number;
   total: number;
 }) {
-  const { season } = round;
-  const [start, end] = season.label.split("-");
-
   return (
     <header className="plate">
       <p className="plate__round eyebrow">
@@ -32,32 +29,18 @@ export function SeasonPlate({
       </p>
 
       <h2 className="plate__year">
-        {start}–{end}
+        ONE<sup>ROSTER SPOT</sup>
       </h2>
 
       <p className="plate__facts">
-        <span>{season.era}</span>
+        <span>{round.options.length} comparable Spurs player-seasons</span>
         <i className="sep" aria-hidden="true" />
-        <span>
-          <b>
-            {season.wins}–{season.losses}
-          </b>
-        </span>
-        <i className="sep" aria-hidden="true" />
-        <span>{postseasonShort(season.postseason)}</span>
-        {season.coach && (
-          <>
-            <i className="sep" aria-hidden="true" />
-            <span>{season.coach.split(",")[0]}</span>
-          </>
-        )}
+        <span>Numbers first</span>
       </p>
 
       <p className="plate__facts">
-        {season.title && <span className="chip chip--title">NBA Champions</span>}
-        {!season.title && season.finals && <span className="chip chip--finals">Finals</span>}
-        {season.league === "ABA" && <span className="chip chip--aba">ABA</span>}
-        {season.arena && <span className="chip">{season.arena}</span>}
+        <span className="chip chip--finals">2010s–20s focus</span>
+        <span className="chip">Year + age on every card</span>
       </p>
     </header>
   );

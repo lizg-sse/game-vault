@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "node --experimental-strip-types --experimental-loader ./scripts/ts-extensionless-loader.mjs --test scripts/test-six-clues.mjs scripts/test-best-of-three.mjs"
   },
   "dependencies": {
     "next": "16.3.0",

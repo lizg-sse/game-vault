@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import type { Player } from '@/lib/six-clues/players'
 import { MAX_ROUNDS } from '@/lib/six-clues/game'
+import { isCoyote } from '@/lib/six-clues/coyote'
 
 /**
  * Blur in px and black-tint opacity for 1…6 clues on the table. Headshots sit on a
@@ -24,6 +25,7 @@ export function Headshot({
   lost: boolean
 }) {
   const done = solved || lost
+  const coyote = isCoyote(player)
   const step = Math.min(revealed, MAX_ROUNDS) - 1
   const blur = BLUR[step] ?? BLUR[0]
   const tint = done ? 0 : (TINT[step] ?? TINT[0])
@@ -40,13 +42,13 @@ export function Headshot({
         }`}
       >
         <Image
-          src={`/six-clues/${player.id}.webp`}
+          src={coyote ? '/six-clues/coyote.png' : '/six-clues/' + player.id + '.webp'}
           alt={done ? player.name : 'Obscured photo of the mystery Spur'}
           width={512}
           height={512}
           priority
           unoptimized
-          className="h-full w-full object-cover transition-[filter,transform] duration-700 ease-out"
+          className={`h-full w-full ${coyote ? 'object-contain bg-white' : 'object-cover'} transition-[filter,transform] duration-700 ease-out`}
           style={{
             filter: done
               ? 'none'
