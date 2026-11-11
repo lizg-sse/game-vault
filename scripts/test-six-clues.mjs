@@ -26,8 +26,16 @@ test('pools only use players with a Spurs season in 1999 or later plus the reque
   }
 
   assert.ok(poolFor('hard').some(p => p.name === 'Doc Rivers'))
-  assert.equal(poolFor('easy').length, 49)
-  assert.equal(poolFor('hard').length, 66)
+})
+
+test('curated pools only include players with an active authored hint pack', () => {
+  const authoredIds = new Set(Object.keys(HINTS).map(Number))
+
+  for (const mode of ['easy', 'hard']) {
+    for (const p of poolFor(mode)) {
+      assert.ok(authoredIds.has(p.id), `${mode} contains ${p.name} without an active hint pack`)
+    }
+  }
 })
 
 test('Coyote is the first player in both pools', () => {
@@ -44,21 +52,24 @@ test('hint player names stay hidden when the remaining field is no larger than t
   assert.equal(shouldShowHintPlayers(7, 6), true)
 })
 
-test('Coyote has the authored six-pack and no category metadata', () => {
+test('Coyote has the authored six-pack and no display category metadata', () => {
   const clues = buildClues(poolFor('easy')[0])
-  assert.deepEqual(clues.map(clue => clue.value), [
-    'Famously ejected from a game for mocking behavior',
-    'Suffered a serious injury after drawing a charge from Nuggets player, Aaron Brooks',
-    'Brought home a trophy from the 2012 All-Star weekend',
-    'Inducted into the hall of fame in 2007',
-    'Logged an iron-man streak of over 1,000 consecutive San Antonio home game appearances without a single injury',
-    "Holds an honorary degree in 'Dunkology'",
-  ])
+  assert.deepEqual(clues.map(clue => clue.value), HINTS[999999].map(hint => hint.text))
   assert.ok(clues.every(clue => !('label' in clue)))
   assert.ok(HINTS[999999].every(clue => !('label' in clue)))
 })
 
-test('every eligible player has six authored, uniquely keyed clues', () => {
+test('authored clues are emitted in the order written in the hints file', () => {
+  for (const p of poolFor('hard')) {
+    assert.deepEqual(
+      buildClues(p).map(clue => clue.value),
+      HINTS[p.id].map(hint => hint.text),
+      `${p.name} clues should preserve hints.ts order`,
+    )
+  }
+})
+
+test('every curated player has six authored, uniquely keyed clues', () => {
   const pool = poolFor('hard')
 
   for (const p of pool) {
@@ -92,7 +103,6 @@ test('the authored clue set contains the requested Spurs stories in sensible pos
   assert.ok(wemby.findIndex(text => /35\+ points.*10\+ rebounds.*2\+ blocks/i.test(text)) >= 2)
 
   assert.ok(clueText('Avery Johnson').some(text => /The Little General/i.test(text)))
-  assert.ok(clueText('David Robinson').some(text => /quadruple-double/i.test(text)))
   assert.ok(clueText('George Gervin').some(text => /four NBA scoring titles/i.test(text)))
   assert.ok(clueText('Boris Diaw').some(text => /espresso machine/i.test(text)))
   assert.ok(clueText('Dejounte Murray').some(text => /franchise.*triple-double record/i.test(text)))

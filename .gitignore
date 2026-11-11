@@ -42,3 +42,6 @@ next-env.d.ts
 
 # cached upstream responses for scripts/build-players.mjs
 /scripts/.cache
+/dist/
+.vinext/
+.wrangler/

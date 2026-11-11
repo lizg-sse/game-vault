@@ -11,6 +11,36 @@ the team is graded out of 100.
 npm run dev
 ```
 
+## Deploying to Cloudflare Workers
+
+The production Worker path uses Vinext, Cloudflare's current Next.js 16
+deployment path. The existing Next.js development and build scripts remain
+available.
+
+```bash
+# Validate the Worker build locally
+npm run build:vinext
+
+# Preview the built Worker at http://localhost:8787
+npm run preview:vinext
+
+# Authenticate once, then deploy to your Cloudflare account
+npx wrangler login
+npm run deploy
+```
+
+Regenerate the Worker binding types after changing `wrangler.jsonc`:
+
+```bash
+npm run cf-typegen
+```
+
+The deploy command targets the Worker named `spurs-vault` from
+[`wrangler.jsonc`](wrangler.jsonc). It uses Workers Cache for page caching and
+does not require KV, R2, or other provisioned Cloudflare resources. Set an
+`account_id` in `wrangler.jsonc` only if your Cloudflare login has access to
+multiple accounts; otherwise Wrangler will use the authenticated account.
+
 ## The game
 
 Every vault walks chronologically from the ABA years to the present: the five

@@ -11,7 +11,11 @@ const eslintConfig = defineConfig([
     ".next/**",
     "out/**",
     "build/**",
+    "dist/**",
+    ".vinext/**",
+    ".wrangler/**",
     "next-env.d.ts",
+    "worker-configuration.d.ts",
     // Agent worktrees hold their own checkout of the same sources.
     ".claude/**",
   ]),

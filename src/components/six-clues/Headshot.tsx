@@ -6,12 +6,12 @@ import { MAX_ROUNDS } from '@/lib/six-clues/game'
 import { isCoyote } from '@/lib/six-clues/coyote'
 
 /**
- * Blur in px and black-tint opacity for 1…6 clues on the table. Headshots sit on a
- * white ground, so blur alone would leave a bright, featureless card — the tint is
- * what makes the early rounds read as a photo developing out of the dark.
+ * Keep the portrait equally obscured throughout the guessing sequence. Headshots
+ * sit on a white ground, so blur alone would leave a bright, featureless card —
+ * the tint keeps the mystery photo readable without identifying the player.
  */
-const BLUR = [26, 19, 13, 8, 5, 3]
-const TINT = [0.76, 0.63, 0.49, 0.35, 0.22, 0.12]
+const BLUR = 26
+const TINT = 0.76
 
 export function Headshot({
   player,
@@ -26,9 +26,7 @@ export function Headshot({
 }) {
   const done = solved || lost
   const coyote = isCoyote(player)
-  const step = Math.min(revealed, MAX_ROUNDS) - 1
-  const blur = BLUR[step] ?? BLUR[0]
-  const tint = done ? 0 : (TINT[step] ?? TINT[0])
+  const tint = done ? 0 : TINT
 
   return (
     <div className="relative mx-auto w-[min(56vw,190px)]">
@@ -52,7 +50,7 @@ export function Headshot({
           style={{
             filter: done
               ? 'none'
-              : `blur(${blur}px) grayscale(1) contrast(1.15) brightness(0.82)`,
+              : `blur(${BLUR}px) grayscale(1) contrast(1.15) brightness(0.82)`,
             // Scaling up hides the soft edge the blur leaves at the frame border.
             transform: done ? 'none' : 'scale(1.14)',
           }}

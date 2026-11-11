@@ -264,6 +264,7 @@ function Board() {
       <div ref={scrollRef} className="relative z-10 flex-1 overflow-y-auto px-4 pt-5 pb-4">
         <div className="mx-auto w-full max-w-md space-y-5">
           <Headshot
+            key={target.id}
             player={target}
             revealed={revealed}
             solved={game.status === 'won'}

@@ -1,5 +1,6 @@
 import { PLAYERS, type Player } from './players'
 import { COYOTE, COYOTE_ID } from './coyote'
+import { HINTS } from './hints'
 
 export type Mode = 'easy' | 'hard'
 
@@ -18,10 +19,11 @@ export function isInSixCluesScope(player: Player) {
   return player.id === COYOTE_ID || player.to >= 1999 || REQUESTED_LEGACY_PLAYERS.has(player.name)
 }
 
-/** Easy draws only from tier 1; Hard adds every in-scope player. Coyote leads both. */
+/** Easy draws from curated tier 1 packs; Hard adds every other curated pack. Coyote leads both. */
 export function poolFor(mode: Mode): Player[] {
   const scoped = [COYOTE, ...PLAYERS.filter(player => player.id !== COYOTE_ID && isInSixCluesScope(player))]
-  return mode === 'easy' ? scoped.filter(p => p.tier === 1) : scoped
+  const curated = scoped.filter(player => HINTS[player.id])
+  return mode === 'easy' ? curated.filter(p => p.tier === 1) : curated
 }
 
 /** The non-daily board walks this ordered pool, starting with Coyote. */
